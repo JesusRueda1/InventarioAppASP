@@ -6,56 +6,84 @@
 <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
 
     <!-- ── Columna izquierda: Formulario nueva compra ── -->
-    <div class="bg-white rounded-xl shadow p-6">
-        <h2 class="text-base font-semibold text-gray-700 mb-4">📥 Registrar Nueva Compra</h2>
+    <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
+        <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+            </div>
+            <div>
+                <h2 class="text-lg font-bold text-gray-800">Registrar Nueva Compra</h2>
+                <p class="text-xs text-gray-500">Ingresa los productos adquiridos</p>
+            </div>
+        </div>
 
-        <div class="mb-4">
-            <label class="label-f">Proveedor (opcional)</label>
-            <input id="proveedor" type="text" placeholder="Nombre del proveedor"
-                   class="input-f" />
+        <div class="mb-5">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Proveedor (opcional)</label>
+            <div class="relative">
+                <input id="proveedor" type="text" placeholder="Nombre del proveedor"
+                       class="w-full border-2 border-gray-200 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all" />
+                <svg class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                </svg>
+            </div>
         </div>
 
         <!-- Agregar productos al detalle -->
-        <div class="border border-gray-200 rounded-lg p-4 mb-4 bg-gray-50">
-            <p class="text-sm font-medium text-gray-600 mb-3">Agregar producto</p>
-            <div class="flex gap-2 flex-wrap">
-                <select id="sel-producto" class="input-f flex-1 min-w-[160px]">
+        <div class="border-2 border-dashed border-gray-200 rounded-xl p-5 mb-5 bg-gradient-to-br from-gray-50 to-slate-50">
+            <p class="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                Agregar producto a la compra
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                <select id="sel-producto" class="sm:col-span-2 border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 transition-all">
                     <option value="">-- Producto --</option>
                     @foreach (var p in productos)
                     {
                         <option value="@p.Id" data-precio="@p.Precio">@p.Nombre</option>
                     }
                 </select>
-                <input id="inp-cant" type="number" min="1" value="1" placeholder="Cant." class="input-f w-20" />
-                <input id="inp-costo" type="number" step="0.01" min="0" placeholder="Costo unit." class="input-f w-28" />
-                <button onclick="agregarItem()"
-                        class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-4 py-2 rounded-lg transition whitespace-nowrap">
-                    + Agregar
-                </button>
+                <input id="inp-cant" type="number" min="1" value="1" placeholder="Cantidad" class="border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 transition-all" />
+                <input id="inp-costo" type="number" step="0.01" min="0" placeholder="Costo unit." class="border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 transition-all" />
             </div>
+            <button onclick="agregarItem()"
+                    class="mt-3 w-full btn-action bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition flex items-center justify-center gap-2 shadow-md">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Agregar a la lista
+            </button>
         </div>
 
         <!-- Tabla de detalle -->
-        <div class="overflow-x-auto mb-4">
+        <div class="overflow-x-auto mb-5 rounded-xl border border-gray-200">
             <table class="w-full text-sm">
-                <thead class="bg-gray-100 text-gray-600">
+                <thead class="bg-gradient-to-r from-slate-700 to-slate-800 text-white">
                     <tr>
-                        <th class="px-3 py-2 text-left">Producto</th>
-                        <th class="px-3 py-2 text-center">Cant.</th>
-                        <th class="px-3 py-2 text-right">Costo</th>
-                        <th class="px-3 py-2 text-right">Subtotal</th>
-                        <th class="px-3 py-2"></th>
+                        <th class="px-4 py-3 text-left font-semibold text-xs uppercase tracking-wide">Producto</th>
+                        <th class="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wide">Cant.</th>
+                        <th class="px-4 py-3 text-right font-semibold text-xs uppercase tracking-wide">Costo</th>
+                        <th class="px-4 py-3 text-right font-semibold text-xs uppercase tracking-wide">Subtotal</th>
+                        <th class="px-4 py-3 w-10"></th>
                     </tr>
                 </thead>
-                <tbody id="detalle-body">
+                <tbody id="detalle-body" class="divide-y divide-gray-100">
                     <tr id="row-empty">
-                        <td colspan="5" class="text-center py-4 text-gray-400">No hay productos agregados</td>
+                        <td colspan="5" class="text-center py-8">
+                            <svg class="w-10 h-10 mx-auto text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                            <p class="text-gray-400 text-sm">No hay productos agregados</p>
+                        </td>
                     </tr>
                 </tbody>
-                <tfoot>
-                    <tr class="border-t border-gray-200 font-semibold">
-                        <td colspan="3" class="px-3 py-2 text-right text-gray-600">Total:</td>
-                        <td class="px-3 py-2 text-right text-indigo-700 text-base" id="total-compra">$0.00</td>
+                <tfoot class="bg-gradient-to-r from-indigo-50 to-purple-50">
+                    <tr>
+                        <td colspan="3" class="px-4 py-4 text-right font-bold text-gray-700 text-base">Total:</td>
+                        <td class="px-4 py-4 text-right font-bold text-indigo-700 text-xl" id="total-compra">$0.00</td>
                         <td></td>
                     </tr>
                 </tfoot>
@@ -63,26 +91,53 @@
         </div>
 
         <button onclick="registrarCompra()"
-                class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 rounded-lg transition text-sm">
-            ✅ Registrar Compra
+                class="w-full btn-action bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold py-3.5 rounded-xl transition text-sm shadow-lg flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            Registrar Compra
         </button>
     </div>
 
     <!-- ── Columna derecha: Historial de compras ── -->
-    <div class="bg-white rounded-xl shadow p-6">
-        <h2 class="text-base font-semibold text-gray-700 mb-4">📋 Historial de Compras</h2>
+    <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
+        <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 bg-gradient-to-br from-slate-600 to-slate-700 rounded-xl flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+            </div>
+            <div>
+                <h2 class="text-lg font-bold text-gray-800">Historial de Compras</h2>
+                <p class="text-xs text-gray-500">Registro de todas las compras realizadas</p>
+            </div>
+        </div>
         <div id="tabla-compras"></div>
     </div>
 </div>
 
 <!-- Modal: Detalle de compra -->
-<div id="modal-detalle" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6">
-        <h3 class="text-base font-semibold mb-4">📋 Detalle de Compra</h3>
-        <div id="detalle-modal-content"></div>
-        <div class="flex justify-end mt-4">
-            <button onclick="$('#modal-detalle').addClass('hidden')"
-                    class="px-4 py-2 text-sm border rounded-lg hover:bg-gray-100">Cerrar</button>
+<div id="modal-detalle" class="modal-overlay fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+    <div class="modal-content bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 mx-4">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <span class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                </span>
+                Detalle de Compra
+            </h3>
+            <button onclick="cerrarModalDetalle()" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition">
+                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div id="detalle-modal-content" class="rounded-xl border border-gray-200 overflow-hidden"></div>
+        <div class="flex justify-end mt-5">
+            <button onclick="cerrarModalDetalle()"
+                    class="px-5 py-2.5 text-sm font-medium border-2 border-gray-200 rounded-xl hover:bg-gray-50 transition">Cerrar</button>
         </div>
     </div>
 </div>
@@ -95,7 +150,7 @@
 
 @section Scripts {
 <script>
-var detalleCompra = [];   // arreglo de items del formulario
+var detalleCompra = [];
 
 // ── Tabla historial ──────────────────────────────────────────
 var tablaH = new Tabulator("#tabla-compras", {
@@ -103,20 +158,37 @@ var tablaH = new Tabulator("#tabla-compras", {
     layout: "fitColumns",
     pagination: "local",
     paginationSize: 8,
-    placeholder: "Sin compras registradas",
+    placeholder: "<div class='text-center py-8'><svg class='w-10 h-10 mx-auto text-gray-300 mb-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'/></svg><p class='text-gray-400 text-sm'>Sin compras registradas</p></div>",
     columns: [
-        { title: "#",          field: "id",         width: 55 },
-        { title: "Fecha",      field: "fecha",       widthGrow: 1 },
-        { title: "Proveedor",  field: "proveedor",   widthGrow: 1 },
-        { title: "Total",      field: "total",       width: 100, hozAlign: "right",
-          formatter: "money", formatterParams: { symbol: "$", precision: 2 } },
-        { title: "", width: 80, hozAlign: "center",
+        { title: "ID", field: "id", width: 60, hozAlign: "center",
+          formatter: function(cell) {
+              return `<span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100 text-slate-700 font-semibold text-xs">${cell.getValue()}</span>`;
+          }
+        },
+        { title: "Fecha", field: "fecha", widthGrow: 1,
+          formatter: function(cell) {
+              return `<span class="text-gray-600 text-xs">${cell.getValue()}</span>`;
+          }
+        },
+        { title: "Proveedor", field: "proveedor", widthGrow: 1,
+          formatter: function(cell) {
+              var val = cell.getValue();
+              return val ? `<span class="font-medium text-gray-700">${val}</span>` : `<span class="text-gray-400 italic">No especificado</span>`;
+          }
+        },
+        { title: "Total", field: "total", width: 100, hozAlign: "right",
+          formatter: function(cell) {
+              return `<span class="font-bold text-emerald-600">$${parseFloat(cell.getValue()).toFixed(2)}</span>`;
+          }
+        },
+        { title: "", width: 70, hozAlign: "center",
           formatter: function(cell) {
               return `<button onclick="verDetalle(${cell.getRow().getData().id})"
-                  class="text-indigo-600 hover:underline text-xs">Ver</button>`;
+                  class="text-indigo-600 hover:text-indigo-800 text-xs font-medium hover:underline">Ver</button>`;
           }
         }
     ]
+
 });
 
 // ── Agregar item al detalle ──────────────────────────────────
@@ -128,12 +200,14 @@ function agregarItem() {
     var costo  = parseFloat($("#inp-costo").val());
 
     if (!pid || cant < 1 || isNaN(costo) || costo < 0) {
-        alert("Completa todos los campos del producto."); return;
+        Toast.warning('Campos incompletos', 'Por favor completa todos los campos del producto');
+        return;
     }
 
     detalleCompra.push({ productoId: pid, nombre: pnom, cantidad: cant, precioCosto: costo });
     renderDetalle();
     $("#sel-producto").val(""); $("#inp-cant").val(1); $("#inp-costo").val("");
+    Toast.info('Agregado', 'Producto agregado a la lista');
 }
 
 // Auto-rellenar costo con el precio del producto
@@ -145,61 +219,126 @@ $("#sel-producto").on("change", function() {
 function renderDetalle() {
     var body = $("#detalle-body"); body.empty();
     if (detalleCompra.length === 0) {
-        body.html('<tr id="row-empty"><td colspan="5" class="text-center py-4 text-gray-400">No hay productos agregados</td></tr>');
-        $("#total-compra").text("$0.00"); return;
+        body.html(`<tr id="row-empty">
+            <td colspan="5" class="text-center py-8">
+                <svg class="w-10 h-10 mx-auto text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+                <p class="text-gray-400 text-sm">No hay productos agregados</p>
+            </td>
+        </tr>`);
+        $("#total-compra").text("$0.00"); 
+        return;
     }
     var total = 0;
     detalleCompra.forEach(function(item, i) {
         var sub = item.cantidad * item.precioCosto;
         total += sub;
-        body.append(`<tr class="border-t border-gray-100">
-            <td class="px-3 py-2">${item.nombre}</td>
-            <td class="px-3 py-2 text-center">${item.cantidad}</td>
-            <td class="px-3 py-2 text-right">$${item.precioCosto.toFixed(2)}</td>
-            <td class="px-3 py-2 text-right">$${sub.toFixed(2)}</td>
-            <td class="px-3 py-2 text-center">
-                <button onclick="quitarItem(${i})" class="text-red-500 hover:text-red-700 text-xs">✕</button>
+        body.append(`<tr class="hover:bg-gray-50 transition">
+            <td class="px-4 py-3 font-medium text-gray-800">${item.nombre}</td>
+            <td class="px-4 py-3 text-center">
+                <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 font-semibold text-sm">${item.cantidad}</span>
+            </td>
+            <td class="px-4 py-3 text-right text-gray-600">$${item.precioCosto.toFixed(2)}</td>
+            <td class="px-4 py-3 text-right font-semibold text-emerald-600">$${sub.toFixed(2)}</td>
+            <td class="px-4 py-3 text-center">
+                <button onclick="quitarItem(${i})" class="w-7 h-7 rounded-full bg-red-100 hover:bg-red-200 text-red-500 hover:text-red-700 flex items-center justify-center transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
             </td>
         </tr>`);
     });
     $("#total-compra").text("$" + total.toFixed(2));
 }
 
-function quitarItem(i) { detalleCompra.splice(i, 1); renderDetalle(); }
+function quitarItem(i) { 
+    detalleCompra.splice(i, 1); 
+    renderDetalle(); 
+}
 
 // ── Registrar compra ─────────────────────────────────────────
 function registrarCompra() {
-    if (detalleCompra.length === 0) { alert("Agrega al menos un producto."); return; }
-    $.ajax({
-        url: "/Compras/Registrar", method: "POST", contentType: "application/json",
-        data: JSON.stringify({ proveedor: $("#proveedor").val(), detalles: detalleCompra }),
-        success: function(res) {
-            mostrarToast(res.mensaje, "exito");
-            detalleCompra = []; renderDetalle();
-            $("#proveedor").val("");
-            tablaH.setData();
-        },
-        error: function(xhr) { mostrarToast(xhr.responseJSON?.mensaje || "Error", "error"); }
+    if (detalleCompra.length === 0) { 
+        Toast.warning('Carrito vacio', 'Agrega al menos un producto para registrar la compra');
+        return; 
+    }
+
+    Swal2.confirm({
+        title: 'Confirmar compra?',
+        text: 'Se registrara la compra y se actualizara el inventario',
+        icon: 'question'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: "/Compras/Registrar", method: "POST", contentType: "application/json",
+                data: JSON.stringify({ proveedor: $("#proveedor").val(), detalles: detalleCompra }),
+                success: function(res) {
+                    Swal2.success({ 
+                        title: 'Compra registrada!', 
+                        text: res.mensaje,
+                        timer: 2500 
+                    });
+                    detalleCompra = []; 
+                    renderDetalle();
+                    $("#proveedor").val("");
+                    tablaH.setData();
+                },
+                error: function(xhr) { 
+                    Swal2.error({ title: 'Error', text: xhr.responseJSON?.mensaje || "Error al registrar" }); 
+                }
+            });
+        }
     });
 }
 
 // ── Ver detalle ──────────────────────────────────────────────
 function verDetalle(id) {
     $.get("/Compras/ObtenerDetalle/" + id, function(data) {
-        var html = '<table class="w-full text-sm"><thead class="bg-gray-100"><tr><th class="px-3 py-2 text-left">Producto</th><th class="px-3 py-2 text-center">Cant.</th><th class="px-3 py-2 text-right">Costo</th><th class="px-3 py-2 text-right">Subtotal</th></tr></thead><tbody>';
+        var html = `<table class="w-full text-sm">
+            <thead class="bg-gradient-to-r from-slate-700 to-slate-800 text-white">
+                <tr>
+                    <th class="px-4 py-3 text-left font-semibold text-xs uppercase">Producto</th>
+                    <th class="px-4 py-3 text-center font-semibold text-xs uppercase">Cant.</th>
+                    <th class="px-4 py-3 text-right font-semibold text-xs uppercase">Costo</th>
+                    <th class="px-4 py-3 text-right font-semibold text-xs uppercase">Subtotal</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">`;
+        var total = 0;
         data.forEach(function(d) {
-            html += `<tr class="border-t"><td class="px-3 py-2">${d.productoNombre}</td><td class="px-3 py-2 text-center">${d.cantidad}</td><td class="px-3 py-2 text-right">$${d.precioCosto.toFixed(2)}</td><td class="px-3 py-2 text-right">$${d.subtotal.toFixed(2)}</td></tr>`;
+            total += d.subtotal;
+            html += `<tr class="hover:bg-gray-50">
+                <td class="px-4 py-3 font-medium text-gray-800">${d.productoNombre}</td>
+                <td class="px-4 py-3 text-center"><span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 font-semibold text-xs">${d.cantidad}</span></td>
+                <td class="px-4 py-3 text-right text-gray-600">$${d.precioCosto.toFixed(2)}</td>
+                <td class="px-4 py-3 text-right font-semibold text-emerald-600">$${d.subtotal.toFixed(2)}</td>
+            </tr>`;
         });
-        html += '</tbody></table>';
+        html += `</tbody>
+            <tfoot class="bg-gradient-to-r from-indigo-50 to-purple-50">
+                <tr>
+                    <td colspan="3" class="px-4 py-3 text-right font-bold text-gray-700">Total:</td>
+                    <td class="px-4 py-3 text-right font-bold text-indigo-700 text-lg">$${total.toFixed(2)}</td>
+                </tr>
+            </tfoot>
+        </table>`;
         $("#detalle-modal-content").html(html);
-        $("#modal-detalle").removeClass("hidden");
+        $("#modal-detalle").addClass("active");
     });
 }
 
-function mostrarToast(msg, tipo) {
-    var color = tipo === "exito" ? "bg-green-500" : "bg-red-500";
-    var t = $(`<div class="fixed bottom-6 right-6 ${color} text-white px-5 py-3 rounded-xl shadow-lg text-sm z-50">${msg}</div>`);
-    $("body").append(t); setTimeout(() => t.fadeOut(400, () => t.remove()), 3000);
+function cerrarModalDetalle() {
+    $("#modal-detalle").removeClass("active");
 }
+
+// Modal handlers
+$(document).on('keydown', function(e) {
+    if (e.key === 'Escape' && $("#modal-detalle").hasClass("active")) cerrarModalDetalle();
+});
+$("#modal-detalle").on('click', function(e) {
+    if (e.target === this) cerrarModalDetalle();
+});
 </script>
 }

@@ -4,41 +4,87 @@
 
 <!-- Barra de acciones -->
 <div class="flex items-center justify-between mb-6">
-    <p class="text-gray-500 text-sm">Gestión de categorías de productos</p>
+    <div>
+        <p class="text-gray-500 text-sm">Gestion de categorias de productos</p>
+        <p class="text-xs text-gray-400 mt-1">Organiza tu inventario por categorias</p>
+    </div>
     <button onclick="abrirModal()"
-            class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition">
-        + Nueva Categoría
+            class="btn-action bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-sm font-medium px-5 py-2.5 rounded-xl shadow-lg flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Nueva Categoria
     </button>
 </div>
 
 <!-- Tabla Tabulator -->
-<div class="bg-white rounded-xl shadow p-4">
+<div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold text-gray-700 flex items-center gap-2">
+            <span class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                </svg>
+            </span>
+            Listado de Categorias
+        </h3>
+        <span class="text-xs text-gray-400" id="count-categorias"></span>
+    </div>
     <div id="tabla-categorias"></div>
 </div>
 
 <!-- ══════════════════════════════════════════
      Modal: Crear / Editar categoría
 ═══════════════════════════════════════════ -->
-<div id="modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
-        <h2 id="modal-titulo" class="text-lg font-semibold text-gray-800 mb-4">Nueva Categoría</h2>
+<div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
+    <div class="modal-content bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 mx-4">
+        <div class="flex items-center justify-between mb-6">
+            <h2 id="modal-titulo" class="text-xl font-bold text-gray-800">Nueva Categoria</h2>
+            <button onclick="cerrarModal()" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition">
+                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
 
-        <div class="mb-4">
+        <div class="mb-6">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Nombre de la Categoria</label>
+            <div class="relative">
+                <input id="inp-nombre" type="text" placeholder="Ej: Electronica, Ropa, Alimentos..."
+                       class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all" />
+                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z"/>
+                    </svg>
+                </span>
+            </div>
+            <p id="err-nombre" class="text-red-500 text-xs mt-2 hidden flex items-center gap-1">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                El nombre es obligatorio.
+            </p>
+        </div>
+
+        @* <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
             <input id="inp-nombre" type="text" placeholder="Ej: Electrónica"
                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
             <p id="err-nombre" class="text-red-500 text-xs mt-1 hidden">El nombre es obligatorio.</p>
-        </div>
+        </div> *@
 
         <input type="hidden" id="inp-id" value="0" />
 
-        <div class="flex justify-end gap-3 mt-6">
+        <div class="flex gap-3">
             <button onclick="cerrarModal()"
-                    class="px-4 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-100 transition">
+                    class="flex-1 px-4 py-3 text-sm font-medium rounded-xl border-2 border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all">
                 Cancelar
             </button>
-            <button onclick="guardar()"
-                    class="px-4 py-2 text-sm rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition">
+            <button onclick="guardar()" id="btn-guardar"
+                    class="flex-1 px-4 py-3 text-sm font-medium rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg transition-all flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
                 Guardar
             </button>
         </div>
@@ -51,46 +97,94 @@
 var tabla = new Tabulator("#tabla-categorias", {
     ajaxURL: "/Categorias/ObtenerTodas",
     layout: "fitColumns",
-    placeholder: "No hay categorías registradas",
+    placeholder: "<div class='text-center py-8'><svg class='w-12 h-12 mx-auto text-gray-300 mb-3' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4'/></svg><p class='text-gray-400 text-sm'>No hay categorias registradas</p></div>",
     pagination: "local",
     paginationSize: 10,
     columns: [
-        { title: "#",       field: "id",     width: 60, hozAlign: "center" },
-        { title: "Nombre",  field: "nombre", widthGrow: 1 },
+        { title: "ID", field: "id", width: 70, hozAlign: "center",
+          formatter: function(cell) {
+              return `<span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 font-semibold text-xs">${cell.getValue()}</span>`;
+          }
+        },
+        { title: "Nombre", field: "nombre", widthGrow: 1,
+          formatter: function(cell) {
+              return `<span class="font-medium text-gray-800">${cell.getValue()}</span>`;
+          }
+        },
         {
             title: "Acciones",
             hozAlign: "center",
-            width: 160,
+            width: 180,
             formatter: function (cell) {
+                var d = cell.getRow().getData();
                 return `<div class="flex gap-2 justify-center">
-                    <button onclick="editar(${cell.getRow().getData().id}, '${cell.getRow().getData().nombre}')"
-                        class="bg-yellow-400 hover:bg-yellow-500 text-white text-xs px-3 py-1 rounded-md">✏️ Editar</button>
-                    <button onclick="eliminar(${cell.getRow().getData().id})"
-                        class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 rounded-md">🗑 Eliminar</button>
+                    <button onclick="editar(${d.id}, '${d.nombre.replace(/'/g, "\\'")}')"
+                        class="btn-action bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-white text-xs px-3 py-1.5 rounded-lg font-medium flex items-center gap-1 shadow-sm">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Editar
+                    </button>
+                    <button onclick="eliminar(${d.id})"
+                        class="btn-action bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white text-xs px-3 py-1.5 rounded-lg font-medium flex items-center gap-1 shadow-sm">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                        Eliminar
+                    </button>
                 </div>`;
             }
         }
     ]
 });
 
+// Update count on data load
+tabla.on("dataLoaded", function(data) {
+    $("#count-categorias").text(data.length + " registro(s)");
+});
+
 // ── Modal ────────────────────────────────────────────────────
 function abrirModal(id = 0, nombre = "") {
     $("#inp-id").val(id);
     $("#inp-nombre").val(nombre);
-    $("#modal-titulo").text(id === 0 ? "Nueva Categoría" : "Editar Categoría");
+    $("#modal-titulo").text(id === 0 ? "Nueva Categoria" : "Editar Categoria");
     $("#err-nombre").addClass("hidden");
-    $("#modal").removeClass("hidden");
+    $("#modal").addClass("active");
+    setTimeout(() => $("#inp-nombre").focus(), 300);
 }
 
-function cerrarModal() { $("#modal").addClass("hidden"); }
+function cerrarModal() { 
+    $("#modal").removeClass("active"); 
+}
 
-function editar(id, nombre) { abrirModal(id, nombre); }
+function editar(id, nombre) { 
+    abrirModal(id, nombre); 
+}
+
+// Close modal on escape key
+$(document).on('keydown', function(e) {
+    if (e.key === 'Escape' && $("#modal").hasClass("active")) {
+        cerrarModal();
+    }
+});
 
 // ── Guardar (POST) ────────────────────────────────────────────
 function guardar() {
     var nombre = $("#inp-nombre").val().trim();
-    if (!nombre) { $("#err-nombre").removeClass("hidden"); return; }
+    if (!nombre) { 
+        $("#err-nombre").removeClass("hidden"); 
+        $("#inp-nombre").addClass("border-red-500").focus();
+        return; 
+    }
     $("#err-nombre").addClass("hidden");
+
+    $("#inp-nombre").removeClass("border-red-500");
+    
+    // Show loading state
+    var btn = $("#btn-guardar");
+    var originalText = btn.html();
+    btn.html('<svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>').prop('disabled', true);
+
 
     $.ajax({
         url: "/Categorias/Guardar",
@@ -99,38 +193,40 @@ function guardar() {
         data: JSON.stringify({ id: parseInt($("#inp-id").val()), nombre: nombre }),
         success: function (res) {
             cerrarModal();
-            tabla.setData();           // recargar tabla
-            mostrarToast(res.mensaje, "exito");
+            tabla.setData();
+            Toast.success('Guardado', res.mensaje);
         },
         error: function (xhr) {
-            mostrarToast("Error al guardar: " + xhr.responseText, "error");
+            Toast.error('Error', 'No se pudo guardar: ' + xhr.responseText);
+        },
+        complete: function() {
+            btn.html(originalText).prop('disabled', false);
         }
     });
 }
 
 // ── Eliminar (DELETE) ─────────────────────────────────────────
 function eliminar(id) {
-    if (!confirm("¿Eliminar esta categoría?")) return;
-    $.ajax({
-        url: "/Categorias/Eliminar/" + id,
-        method: "DELETE",
-        success: function (res) {
-            tabla.setData();
-            mostrarToast(res.mensaje, "exito");
-        },
-        error: function (xhr) {
-            var msg = xhr.responseJSON?.mensaje || "Error al eliminar";
-            mostrarToast(msg, "error");
+    Swal2.delete({
+        title: 'Eliminar categoria?',
+        text: 'Esta accion eliminara la categoria permanentemente'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: "/Categorias/Eliminar/" + id,
+                method: "DELETE",
+                success: function (res) {
+                    tabla.setData();
+                    Toast.success('Eliminado', res.mensaje);
+                },
+                error: function (xhr) {
+                    var msg = xhr.responseJSON?.mensaje || "Error al eliminar";
+                    Swal2.error({ title: 'Error', text: msg });
+                }
+            });
         }
     });
 }
 
-// ── Toast de notificación ─────────────────────────────────────
-function mostrarToast(mensaje, tipo) {
-    var color = tipo === "exito" ? "bg-green-500" : "bg-red-500";
-    var toast = $(`<div class="fixed bottom-6 right-6 ${color} text-white px-5 py-3 rounded-xl shadow-lg text-sm z-50">${mensaje}</div>`);
-    $("body").append(toast);
-    setTimeout(() => toast.fadeOut(400, () => toast.remove()), 3000);
-}
 </script>
 }
