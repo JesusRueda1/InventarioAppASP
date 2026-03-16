@@ -8,18 +8,184 @@
     <!-- Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Tabulator CSS -->
-    <!-- <link rel="stylesheet" href="https://unpkg.com/tabulator-tables@6.2.1/dist/css/tabulator_tailwind.min.css"/> -->
     <link rel="stylesheet" href="https://unpkg.com/tabulator-tables@6.2.1/dist/css/tabulator.min.css"/>
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"/>
+    <!-- iziToast CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/izitoast@1.4.0/dist/css/iziToast.min.css"/>
+    <!-- Animate.css for extra animations -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <!-- Font: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         body { font-family: 'Inter', sans-serif; }
+        
         /* Sidebar activo */
         .nav-link.active { background-color: #4338ca; color: #ffffff; }
+        
         /* Alerta stock bajo en Tabulator */
         .stock-bajo { background-color: #fef2f2 !important; color: #991b1b !important; font-weight: 600; }
+        
+        /* ══════════════════════════════════════════
+           Modal Animations
+        ═══════════════════════════════════════════ */
+        .modal-overlay {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            transform: scale(0.8) translateY(-20px);
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+        }
+        .modal-overlay.active .modal-content {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+        
+        /* ══════════════════════════════════════════
+           Professional Tabulator Styles
+        ═══════════════════════════════════════════ */
+        .tabulator {
+            border: none !important;
+            border-radius: 12px !important;
+            overflow: hidden !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+        .tabulator-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            border: none !important;
+            font-weight: 600 !important;
+        }
+        .tabulator-header .tabulator-col {
+            background: transparent !important;
+            border-right: 1px solid rgba(255,255,255,0.1) !important;
+        }
+        .tabulator-header .tabulator-col-content {
+            padding: 14px 16px !important;
+        }
+        .tabulator-header .tabulator-col-title {
+            color: #ffffff !important;
+            font-size: 0.8rem !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+            font-weight: 600 !important;
+        }
+        .tabulator-row {
+            border-bottom: 1px solid #f1f5f9 !important;
+            transition: all 0.2s ease !important;
+        }
+        .tabulator-row:hover {
+            background-color: #f8fafc !important;
+            transform: scale(1.005);
+        }
+        .tabulator-row.tabulator-row-even {
+            background-color: #fafbfc !important;
+        }
+        .tabulator-cell {
+            padding: 14px 16px !important;
+            border: none !important;
+            font-size: 0.875rem !important;
+            color: #374151 !important;
+        }
+        .tabulator-footer {
+            background: #f8fafc !important;
+            border-top: 2px solid #e2e8f0 !important;
+            padding: 12px !important;
+        }
+        .tabulator-page {
+            border-radius: 8px !important;
+            padding: 8px 14px !important;
+            margin: 0 3px !important;
+            border: 1px solid #e2e8f0 !important;
+            background: #fff !important;
+            color: #64748b !important;
+            font-weight: 500 !important;
+            transition: all 0.2s ease !important;
+        }
+        .tabulator-page:hover {
+            background: #667eea !important;
+            color: #fff !important;
+            border-color: #667eea !important;
+        }
+        .tabulator-page.active {
+            background: #667eea !important;
+            color: #fff !important;
+            border-color: #667eea !important;
+        }
+        .tabulator-paginator label {
+            color: #64748b !important;
+            font-weight: 500 !important;
+        }
+        
+        /* Row hover glow effect */
+        .tabulator-row:hover .tabulator-cell {
+            color: #1e293b !important;
+        }
+        
+        /* Stock bajo styling override */
+        .stock-bajo {
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%) !important;
+            border-left: 4px solid #ef4444 !important;
+        }
+        .stock-bajo:hover {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%) !important;
+        }
+        
+        /* ══════════════════════════════════════════
+           Button Animations
+        ═══════════════════════════════════════════ */
+        .btn-action {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .btn-action:active {
+            transform: translateY(0);
+        }
+        
+        /* Card hover effects */
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        /* Fade in animation for page content */
+        .fade-in-up {
+            animation: fadeInUp 0.5s ease forwards;
+        }
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Pulse animation for alerts */
+        .pulse-alert {
+            animation: pulse 2s infinite;
+        }
+        @@keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -104,6 +270,146 @@ else
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <!-- Tabulator JS -->
 <script src="https://unpkg.com/tabulator-tables@6.2.1/dist/js/tabulator.min.js"></script>
+<!-- SweetAlert2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- iziToast JS -->
+<script src="https://cdn.jsdelivr.net/npm/izitoast@1.4.0/dist/js/iziToast.min.js"></script>
+
+<!-- Global iziToast Configuration -->
+<script>
+    iziToast.settings({
+        timeout: 4000,
+        position: 'topRight',
+        transitionIn: 'bounceInDown',
+        transitionOut: 'fadeOutUp',
+        progressBar: true,
+        progressBarColor: 'rgba(255,255,255,0.4)',
+        balloon: false,
+        close: true,
+        pauseOnHover: true,
+        resetOnHover: false
+    });
+    
+    // Global notification functions
+    window.Toast = {
+        success: function(title, message) {
+            iziToast.success({
+                title: title || 'Exito',
+                message: message || '',
+                icon: 'fas fa-check-circle',
+                backgroundColor: '#10b981',
+                titleColor: '#fff',
+                messageColor: '#fff',
+                iconColor: '#fff'
+            });
+        },
+        error: function(title, message) {
+            iziToast.error({
+                title: title || 'Error',
+                message: message || '',
+                icon: 'fas fa-times-circle',
+                backgroundColor: '#ef4444',
+                titleColor: '#fff',
+                messageColor: '#fff',
+                iconColor: '#fff'
+            });
+        },
+        warning: function(title, message) {
+            iziToast.warning({
+                title: title || 'Advertencia',
+                message: message || '',
+                icon: 'fas fa-exclamation-triangle',
+                backgroundColor: '#f59e0b',
+                titleColor: '#fff',
+                messageColor: '#fff',
+                iconColor: '#fff'
+            });
+        },
+        info: function(title, message) {
+            iziToast.info({
+                title: title || 'Informacion',
+                message: message || '',
+                icon: 'fas fa-info-circle',
+                backgroundColor: '#3b82f6',
+                titleColor: '#fff',
+                messageColor: '#fff',
+                iconColor: '#fff'
+            });
+        }
+    };
+    
+    // Global SweetAlert2 configurations
+    window.Swal2 = {
+        confirm: function(options) {
+            return Swal.fire({
+                title: options.title || 'Confirmar accion?',
+                text: options.text || '',
+                icon: options.icon || 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#667eea',
+                cancelButtonColor: '#94a3b8',
+                confirmButtonText: options.confirmText || 'Si, confirmar',
+                cancelButtonText: options.cancelText || 'Cancelar',
+                reverseButtons: true,
+                showClass: {
+                    popup: 'animate__animated animate__zoomIn animate__faster'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__zoomOut animate__faster'
+                }
+            });
+        },
+        delete: function(options) {
+            return Swal.fire({
+                title: options.title || 'Eliminar registro?',
+                text: options.text || 'Esta accion no se puede deshacer',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#94a3b8',
+                confirmButtonText: options.confirmText || 'Si, eliminar',
+                cancelButtonText: options.cancelText || 'Cancelar',
+                reverseButtons: true,
+                showClass: {
+                    popup: 'animate__animated animate__shakeX'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOut animate__faster'
+                }
+            });
+        },
+        success: function(options) {
+            return Swal.fire({
+                title: options.title || 'Operacion exitosa!',
+                text: options.text || '',
+                icon: 'success',
+                confirmButtonColor: '#667eea',
+                timer: options.timer || null,
+                timerProgressBar: !!options.timer,
+                showClass: {
+                    popup: 'animate__animated animate__bounceIn'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOut animate__faster'
+                }
+            });
+        },
+        error: function(options) {
+            return Swal.fire({
+                title: options.title || 'Error!',
+                text: options.text || 'Algo salio mal',
+                icon: 'error',
+                confirmButtonColor: '#ef4444',
+                showClass: {
+                    popup: 'animate__animated animate__headShake'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOut animate__faster'
+                }
+            });
+        }
+    };
+</script>
 
 <!-- Marcar enlace activo en el sidebar -->
 <script>
@@ -115,6 +421,9 @@ else
                 $(this).addClass('active bg-indigo-700');
             }
         });
+        
+        // Add fade-in animation to main content
+        $('main > .flex-1').addClass('fade-in-up');
     });
 </script>
 

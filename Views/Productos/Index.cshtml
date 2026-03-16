@@ -4,59 +4,105 @@
 }
 
 <!-- Barra de acciones -->
-<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
-    <div class="flex items-center gap-3">
-        <input id="busqueda" type="text" placeholder="🔍 Buscar producto..."
-               class="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-64" />
+<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+    <div class="flex items-center gap-3 w-full sm:w-auto">
+        <div class="relative flex-1 sm:flex-initial">
+            <input id="busqueda" type="text" placeholder="Buscar producto..."
+                   class="w-full sm:w-72 border-2 border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all" />
+            <svg class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+        </div>
         <button onclick="buscar()"
-                class="bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm px-4 py-2 rounded-lg transition">
+                class="btn-action bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm px-4 py-2.5 rounded-xl transition font-medium">
             Buscar
         </button>
     </div>
     <button onclick="abrirModal()"
-            class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition">
-        + Nuevo Producto
+            class="btn-action bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-sm font-medium px-5 py-2.5 rounded-xl shadow-lg flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Nuevo Producto
     </button>
 </div>
 
 <!-- Alerta de stock bajo -->
-<div id="alerta-stock" class="hidden bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">
-    ⚠️ Hay productos con stock menor a 5 unidades (resaltados en rojo).
+<div id="alerta-stock" class="hidden pulse-alert bg-gradient-to-r from-red-50 to-rose-50 border-l-4 border-red-500 text-red-700 px-5 py-4 rounded-xl mb-6 flex items-center gap-4 shadow-sm">
+    <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+        <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+    </div>
+    <div>
+        <p class="font-semibold">Atencion: Stock bajo detectado</p>
+        <p class="text-sm text-red-600">Hay productos con menos de 5 unidades (resaltados en rojo)</p>
+    </div>
 </div>
 
 <!-- Tabla Tabulator -->
-<div class="bg-white rounded-xl shadow p-4">
+<div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold text-gray-700 flex items-center gap-2">
+            <span class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                </svg>
+            </span>
+            Inventario de Productos
+        </h3>
+        <span class="text-xs text-gray-400" id="count-productos"></span>
+    </div>
     <div id="tabla-productos"></div>
 </div>
 
 <!-- ══════════ Modal Crear / Editar ══════════ -->
-<div id="modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6">
-        <h2 id="modal-titulo" class="text-lg font-semibold text-gray-800 mb-4">Nuevo Producto</h2>
+<div id="modal" class="modal-overlay fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+    <div class="modal-content bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between mb-6">
+            <h2 id="modal-titulo" class="text-xl font-bold text-gray-800">Nuevo Producto</h2>
+            <button onclick="cerrarModal()" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition">
+                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
 
         <input type="hidden" id="inp-id" value="0" />
 
-        <div class="grid grid-cols-2 gap-4">
-            <div class="col-span-2">
-                <label class="label-form">Nombre *</label>
-                <input id="inp-nombre" type="text" class="input-form" />
-            </div>
-            <div class="col-span-2">
-                <label class="label-form">Descripción</label>
-                <textarea id="inp-descripcion" rows="2" class="input-form"></textarea>
-            </div>
+        <div class="space-y-5">
             <div>
-                <label class="label-form">Precio *</label>
-                <input id="inp-precio" type="number" step="0.01" min="0" class="input-form" />
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Nombre del Producto *</label>
+                <input id="inp-nombre" type="text" placeholder="Ej: Laptop HP Pavilion"
+                       class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all" />
             </div>
+            
             <div>
-                <label class="label-form">Stock *</label>
-                <input id="inp-stock" type="number" min="0" class="input-form" />
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Descripcion</label>
+                <textarea id="inp-descripcion" rows="2" placeholder="Descripcion breve del producto..."
+                          class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all resize-none"></textarea>
             </div>
-            <div class="col-span-2">
-                <label class="label-form">Categoría *</label>
-                <select id="inp-categoria" class="input-form">
-                    <option value="">-- Selecciona --</option>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Precio *</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium">$</span>
+                        <input id="inp-precio" type="number" step="0.01" min="0" placeholder="0.00"
+                               class="w-full border-2 border-gray-200 rounded-xl pl-8 pr-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all" />
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Stock *</label>
+                    <input id="inp-stock" type="number" min="0" placeholder="0"
+                           class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all" />
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Categoria *</label>
+                <select id="inp-categoria" class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all appearance-none bg-white">
+                    <option value="">-- Selecciona una categoria --</option>
                     @foreach (var cat in categorias)
                     {
                         <option value="@cat.Id">@cat.Nombre</option>
@@ -65,27 +111,28 @@
             </div>
         </div>
 
-        <p id="err-form" class="text-red-500 text-xs mt-3 hidden">Todos los campos marcados con * son obligatorios.</p>
+        <p id="err-form" class="text-red-500 text-xs mt-4 hidden flex items-center gap-1">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+            </svg>
+            Todos los campos marcados con * son obligatorios.
+        </p>
 
-        <div class="flex justify-end gap-3 mt-6">
+        <div class="flex gap-3 mt-6">
             <button onclick="cerrarModal()"
-                    class="px-4 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-100 transition">
+                    class="flex-1 px-4 py-3 text-sm font-medium rounded-xl border-2 border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all">
                 Cancelar
             </button>
-            <button onclick="guardar()"
-                    class="px-4 py-2 text-sm rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition">
+            <button onclick="guardar()" id="btn-guardar"
+                    class="flex-1 px-4 py-3 text-sm font-medium rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg transition-all flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
                 Guardar
             </button>
         </div>
     </div>
 </div>
-
-<!-- Estilos inline para campos del formulario -->
-<style>
-    .label-form { display: block; font-size: .875rem; font-weight: 500; color: #374151; margin-bottom: .25rem; }
-    .input-form  { width: 100%; border: 1px solid #d1d5db; border-radius: .5rem; padding: .5rem .75rem; font-size: .875rem; }
-    .input-form:focus { outline: none; box-shadow: 0 0 0 2px #6366f1; border-color: transparent; }
-</style>
 
 @section Scripts {
 <script>
@@ -93,47 +140,77 @@
 var tabla = new Tabulator("#tabla-productos", {
     ajaxURL: "/Productos/ObtenerTodos",
     layout: "fitColumns",
-    placeholder: "No hay productos",
+    placeholder: "<div class='text-center py-8'><svg class='w-12 h-12 mx-auto text-gray-300 mb-3' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'/></svg><p class='text-gray-400 text-sm'>No hay productos registrados</p></div>",
     pagination: "local",
     paginationSize: 10,
     rowFormatter: function (row) {
-        // Resaltar filas con stock bajo
         if (row.getData().stockBajo) row.getElement().classList.add("stock-bajo");
     },
     columns: [
-        { title: "#",          field: "id",              width: 55, hozAlign: "center" },
-        { title: "Nombre",     field: "nombre",           widthGrow: 2 },
-        { title: "Categoría",  field: "categoriaNombre",  widthGrow: 1 },
-        { title: "Precio",     field: "precio",           width: 100, hozAlign: "right",
-          formatter: "money", formatterParams: { symbol: "$", precision: 2 } },
-        { title: "Stock",      field: "stock",            width: 80,  hozAlign: "center",
+        { title: "ID", field: "id", width: 70, hozAlign: "center",
+          formatter: function(cell) {
+              return `<span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 font-semibold text-xs">${cell.getValue()}</span>`;
+          }
+        },
+        { title: "Nombre", field: "nombre", widthGrow: 2,
+          formatter: function(cell) {
+              return `<span class="font-medium text-gray-800">${cell.getValue()}</span>`;
+          }
+        },
+        { title: "Categoria", field: "categoriaNombre", widthGrow: 1,
+          formatter: function(cell) {
+              return `<span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-purple-100 text-purple-700 text-xs font-medium">${cell.getValue()}</span>`;
+          }
+        },
+        { title: "Precio", field: "precio", width: 110, hozAlign: "right",
+          formatter: function(cell) {
+              var val = parseFloat(cell.getValue()).toFixed(2);
+              return `<span class="font-semibold text-emerald-600">$${val}</span>`;
+          }
+        },
+        { title: "Stock", field: "stock", width: 100, hozAlign: "center",
           formatter: function(cell) {
               var v = cell.getValue();
-              return v < 5
-                ? `<span class="bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded">${v} ⚠️</span>`
-                : `<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded">${v}</span>`;
+              if (v < 5) {
+                  return `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-100 text-red-700 font-bold text-xs">
+                      <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                      ${v}
+                  </span>`;
+              }
+              return `<span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-700 font-semibold text-xs">${v}</span>`;
           }
         },
         {
-            title: "Acciones", hozAlign: "center", width: 170,
+            title: "Acciones", hozAlign: "center", width: 180,
             formatter: function(cell) {
                 var d = cell.getRow().getData();
                 return `<div class="flex gap-2 justify-center">
-                    <button onclick="editar(${d.id})" class="bg-yellow-400 hover:bg-yellow-500 text-white text-xs px-3 py-1 rounded-md">✏️ Editar</button>
-                    <button onclick="eliminar(${d.id})" class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 rounded-md">🗑 Eliminar</button>
+                    <button onclick="editar(${d.id})" class="btn-action bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-white text-xs px-3 py-1.5 rounded-lg font-medium flex items-center gap-1 shadow-sm">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Editar
+                    </button>
+                    <button onclick="eliminar(${d.id})" class="btn-action bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white text-xs px-3 py-1.5 rounded-lg font-medium flex items-center gap-1 shadow-sm">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                        Eliminar
+                    </button>
                 </div>`;
             }
         }
     ]
 });
 
-// Mostrar alerta si hay stock bajo
+// Events
 tabla.on("dataLoaded", function(data) {
     var hayBajo = data.some(p => p.stockBajo);
     hayBajo ? $("#alerta-stock").removeClass("hidden") : $("#alerta-stock").addClass("hidden");
+    $("#count-productos").text(data.length + " producto(s)");
 });
 
-// ── Búsqueda ─────────────────────────────────────────────────
+// ── Busqueda ─────────────────────────────────────────────────
 function buscar() {
     tabla.setData("/Productos/ObtenerTodos", { busqueda: $("#busqueda").val() });
 }
@@ -146,10 +223,11 @@ function abrirModal() {
     $("#inp-categoria").val("");
     $("#modal-titulo").text("Nuevo Producto");
     $("#err-form").addClass("hidden");
-    $("#modal").removeClass("hidden");
+    $("#modal").addClass("active");
+    setTimeout(() => $("#inp-nombre").focus(), 300);
 }
 
-function cerrarModal() { $("#modal").addClass("hidden"); }
+function cerrarModal() { $("#modal").removeClass("active"); }
 
 function editar(id) {
     $.get("/Productos/ObtenerPorId/" + id, function(p) {
@@ -161,9 +239,17 @@ function editar(id) {
         $("#inp-categoria").val(p.categoria_id);
         $("#modal-titulo").text("Editar Producto");
         $("#err-form").addClass("hidden");
-        $("#modal").removeClass("hidden");
+        $("#modal").addClass("active");
     });
 }
+
+// Close modal handlers
+$(document).on('keydown', function(e) {
+    if (e.key === 'Escape' && $("#modal").hasClass("active")) cerrarModal();
+});
+$("#modal").on('click', function(e) {
+    if (e.target === this) cerrarModal();
+});
 
 // ── Guardar ──────────────────────────────────────────────────
 function guardar() {
@@ -173,9 +259,14 @@ function guardar() {
     var catId     = parseInt($("#inp-categoria").val());
 
     if (!nombre || isNaN(precio) || isNaN(stock) || isNaN(catId)) {
-        $("#err-form").removeClass("hidden"); return;
+        $("#err-form").removeClass("hidden"); 
+        return;
     }
     $("#err-form").addClass("hidden");
+
+    var btn = $("#btn-guardar");
+    var originalText = btn.html();
+    btn.html('<svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>').prop('disabled', true);
 
     $.ajax({
         url: "/Productos/Guardar",
@@ -189,28 +280,37 @@ function guardar() {
         success: function(res) {
             cerrarModal();
             tabla.setData();
-            mostrarToast(res.mensaje, "exito");
+            Toast.success('Guardado', res.mensaje);
         },
-        error: function(xhr) { mostrarToast("Error: " + xhr.responseText, "error"); }
+        error: function(xhr) { 
+            Toast.error('Error', xhr.responseText); 
+        },
+        complete: function() {
+            btn.html(originalText).prop('disabled', false);
+        }
     });
 }
 
 // ── Eliminar ─────────────────────────────────────────────────
 function eliminar(id) {
-    if (!confirm("¿Eliminar este producto?")) return;
-    $.ajax({
-        url: "/Productos/Eliminar/" + id, method: "DELETE",
-        success: function(res) { tabla.setData(); mostrarToast(res.mensaje, "exito"); },
-        error:   function(xhr) { mostrarToast(xhr.responseJSON?.mensaje || "Error", "error"); }
+    Swal2.delete({
+        title: 'Eliminar producto?',
+        text: 'Se eliminara el producto del inventario permanentemente'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: "/Productos/Eliminar/" + id, 
+                method: "DELETE",
+                success: function(res) { 
+                    tabla.setData(); 
+                    Toast.success('Eliminado', res.mensaje); 
+                },
+                error: function(xhr) { 
+                    Swal2.error({ title: 'Error', text: xhr.responseJSON?.mensaje || "Error al eliminar" }); 
+                }
+            });
+        }
     });
-}
-
-// ── Toast ────────────────────────────────────────────────────
-function mostrarToast(msg, tipo) {
-    var color = tipo === "exito" ? "bg-green-500" : "bg-red-500";
-    var t = $(`<div class="fixed bottom-6 right-6 ${color} text-white px-5 py-3 rounded-xl shadow-lg text-sm z-50">${msg}</div>`);
-    $("body").append(t);
-    setTimeout(() => t.fadeOut(400, () => t.remove()), 3000);
 }
 </script>
 }
