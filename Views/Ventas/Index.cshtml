@@ -1,0 +1,207 @@
+@{
+    ViewData["Title"] = "POS – Punto de Venta";
+}
+
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+    <!-- ── Panel izquierdo: buscador + carrito ── -->
+    <div class="xl:col-span-2 space-y-4">
+
+        <!-- Buscador de productos -->
+        <div class="bg-white rounded-xl shadow p-4">
+            <label class="block text-sm font-medium text-gray-600 mb-2">Buscar producto por nombre</label>
+            <div class="flex gap-2">
+                <input id="buscar-prod" type="text" placeholder="Escribe el nombre del producto..."
+                       class="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                <button onclick="buscarProducto()"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-4 py-2 rounded-lg transition">
+                    Buscar
+                </button>
+            </div>
+
+            <!-- Resultados de búsqueda -->
+            <div id="resultados-busqueda" class="mt-3 hidden">
+                <p class="text-xs text-gray-500 mb-2">Haz clic en un producto para agregarlo al carrito:</p>
+                <div id="lista-resultados" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+            </div>
+        </div>
+
+        <!-- Carrito / detalle de venta -->
+        <div class="bg-white rounded-xl shadow p-4">
+            <h2 class="text-base font-semibold text-gray-700 mb-3">🛒 Carrito</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-100 text-gray-600">
+                        <tr>
+                            <th class="px-3 py-2 text-left">Producto</th>
+                            <th class="px-3 py-2 text-center w-28">Cant.</th>
+                            <th class="px-3 py-2 text-right">Precio</th>
+                            <th class="px-3 py-2 text-right">Subtotal</th>
+                            <th class="px-3 py-2 w-10"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="carrito-body">
+                        <tr id="carrito-empty">
+                            <td colspan="5" class="text-center py-8 text-gray-400">
+                                El carrito está vacío. Busca un producto arriba.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Panel derecho: resumen + historial ── -->
+    <div class="space-y-4">
+
+        <!-- Resumen de venta -->
+        <div class="bg-indigo-900 text-white rounded-xl shadow p-6">
+            <p class="text-indigo-300 text-sm mb-1">Total a cobrar</p>
+            <p class="text-4xl font-bold" id="total-venta">$0.00</p>
+            <button onclick="procesarVenta()"
+                    class="mt-6 w-full bg-green-500 hover:bg-green-400 text-white font-bold py-3 rounded-xl transition text-base">
+                ✅ Cobrar Venta
+            </button>
+            <button onclick="limpiarCarrito()"
+                    class="mt-2 w-full bg-indigo-800 hover:bg-indigo-700 text-indigo-200 py-2 rounded-xl transition text-sm">
+                🗑 Limpiar carrito
+            </button>
+        </div>
+
+        <!-- Historial de ventas -->
+        <div class="bg-white rounded-xl shadow p-4">
+            <h3 class="text-sm font-semibold text-gray-700 mb-3">📋 Últimas Ventas</h3>
+            <div id="tabla-ventas"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal comprobante -->
+<div id="modal-comprobante" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center">
+        <div class="text-5xl mb-3">🎉</div>
+        <h3 class="text-lg font-bold text-gray-800 mb-1">¡Venta exitosa!</h3>
+        <p id="comp-total" class="text-3xl font-bold text-green-600 mb-4"></p>
+        <p class="text-sm text-gray-500" id="comp-info"></p>
+        <button onclick="$('#modal-comprobante').addClass('hidden'); tablaV.setData();"
+                class="mt-5 w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-xl transition">
+            Cerrar
+        </button>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+var carrito = [];   // { productoId, nombre, cantidad, precioVenta, stock }
+
+// ── Tabla historial ventas ───────────────────────────────────
+var tablaV = new Tabulator("#tabla-ventas", {
+    ajaxURL: "/Ventas/ObtenerTodas",
+    layout: "fitColumns",
+    pagination: "local",
+    paginationSize: 6,
+    placeholder: "Sin ventas",
+    columns: [
+        { title: "#",     field: "id",    width: 45 },
+        { title: "Fecha", field: "fecha", widthGrow: 1, fontSize: 11 },
+        { title: "Total", field: "total", width: 90, hozAlign: "right",
+          formatter: "money", formatterParams: { symbol: "$", precision: 2 } }
+    ]
+});
+
+// ── Buscar producto ──────────────────────────────────────────
+function buscarProducto() {
+    var q = $("#buscar-prod").val().trim();
+    if (!q) return;
+    $.get("/Ventas/BuscarProducto", { q }, function(data) {
+        var lista = $("#lista-resultados").empty();
+        if (data.length === 0) {
+            lista.html('<p class="col-span-3 text-xs text-gray-500">Sin resultados.</p>');
+        } else {
+            data.forEach(function(p) {
+                lista.append(`<button onclick='agregarAlCarrito(${JSON.stringify(p)})'
+                    class="text-left bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg p-2 text-xs transition">
+                    <p class="font-semibold text-indigo-800">${p.nombre}</p>
+                    <p class="text-gray-500">Stock: ${p.stock} | $${parseFloat(p.precio).toFixed(2)}</p>
+                </button>`);
+            });
+        }
+        $("#resultados-busqueda").removeClass("hidden");
+    });
+}
+$("#buscar-prod").on("keypress", function(e) { if (e.which === 13) buscarProducto(); });
+
+// ── Agregar al carrito ───────────────────────────────────────
+function agregarAlCarrito(p) {
+    var existente = carrito.find(i => i.productoId === p.id);
+    if (existente) {
+        if (existente.cantidad >= existente.stock) {
+            alert("No hay más stock disponible para este producto."); return;
+        }
+        existente.cantidad++;
+    } else {
+        carrito.push({ productoId: p.id, nombre: p.nombre, cantidad: 1, precioVenta: p.precio, stock: p.stock });
+    }
+    renderCarrito();
+    $("#resultados-busqueda").addClass("hidden");
+    $("#buscar-prod").val("");
+}
+
+// ── Renderizar carrito ───────────────────────────────────────
+function renderCarrito() {
+    var body = $("#carrito-body").empty();
+    if (carrito.length === 0) {
+        body.html('<tr id="carrito-empty"><td colspan="5" class="text-center py-8 text-gray-400">El carrito está vacío.</td></tr>');
+        $("#total-venta").text("$0.00"); return;
+    }
+    var total = 0;
+    carrito.forEach(function(item, i) {
+        var sub = item.cantidad * item.precioVenta;
+        total += sub;
+        body.append(`<tr class="border-t border-gray-100">
+            <td class="px-3 py-2 text-sm">${item.nombre}</td>
+            <td class="px-3 py-2 text-center">
+                <div class="flex items-center justify-center gap-1">
+                    <button onclick="cambiarCantidad(${i}, -1)" class="w-6 h-6 bg-gray-200 rounded hover:bg-gray-300 text-sm">-</button>
+                    <span class="w-6 text-center">${item.cantidad}</span>
+                    <button onclick="cambiarCantidad(${i}, 1)" class="w-6 h-6 bg-gray-200 rounded hover:bg-gray-300 text-sm">+</button>
+                </div>
+            </td>
+            <td class="px-3 py-2 text-right text-sm">$${parseFloat(item.precioVenta).toFixed(2)}</td>
+            <td class="px-3 py-2 text-right font-semibold text-sm">$${sub.toFixed(2)}</td>
+            <td class="px-3 py-2 text-center">
+                <button onclick="quitarItem(${i})" class="text-red-400 hover:text-red-600 text-xs">✕</button>
+            </td>
+        </tr>`);
+    });
+    $("#total-venta").text("$" + total.toFixed(2));
+}
+
+function cambiarCantidad(i, delta) {
+    carrito[i].cantidad += delta;
+    if (carrito[i].cantidad <= 0) carrito.splice(i, 1);
+    else if (carrito[i].cantidad > carrito[i].stock) { carrito[i].cantidad = carrito[i].stock; }
+    renderCarrito();
+}
+function quitarItem(i) { carrito.splice(i, 1); renderCarrito(); }
+function limpiarCarrito() { carrito = []; renderCarrito(); }
+
+// ── Procesar venta ───────────────────────────────────────────
+function procesarVenta() {
+    if (carrito.length === 0) { alert("El carrito está vacío."); return; }
+    var detalles = carrito.map(i => ({ productoId: i.productoId, cantidad: i.cantidad, precioVenta: i.precioVenta }));
+    $.ajax({
+        url: "/Ventas/Registrar", method: "POST", contentType: "application/json",
+        data: JSON.stringify({ detalles }),
+        success: function(res) {
+            $("#comp-total").text("$" + parseFloat(res.total).toFixed(2));
+            $("#comp-info").text("Venta #" + res.id + " registrada correctamente.");
+            $("#modal-comprobante").removeClass("hidden");
+            carrito = []; renderCarrito();
+        },
+        error: function(xhr) { alert(xhr.responseJSON?.mensaje || "Error al registrar."); }
+    });
+}
+</script>
+}

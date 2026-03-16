@@ -1,0 +1,136 @@
+@{
+    ViewData["Title"] = "Categorías";
+}
+
+<!-- Barra de acciones -->
+<div class="flex items-center justify-between mb-6">
+    <p class="text-gray-500 text-sm">Gestión de categorías de productos</p>
+    <button onclick="abrirModal()"
+            class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition">
+        + Nueva Categoría
+    </button>
+</div>
+
+<!-- Tabla Tabulator -->
+<div class="bg-white rounded-xl shadow p-4">
+    <div id="tabla-categorias"></div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     Modal: Crear / Editar categoría
+═══════════════════════════════════════════ -->
+<div id="modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+        <h2 id="modal-titulo" class="text-lg font-semibold text-gray-800 mb-4">Nueva Categoría</h2>
+
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+            <input id="inp-nombre" type="text" placeholder="Ej: Electrónica"
+                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            <p id="err-nombre" class="text-red-500 text-xs mt-1 hidden">El nombre es obligatorio.</p>
+        </div>
+
+        <input type="hidden" id="inp-id" value="0" />
+
+        <div class="flex justify-end gap-3 mt-6">
+            <button onclick="cerrarModal()"
+                    class="px-4 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-100 transition">
+                Cancelar
+            </button>
+            <button onclick="guardar()"
+                    class="px-4 py-2 text-sm rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition">
+                Guardar
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+// ── Inicializar tabla Tabulator ──────────────────────────────
+var tabla = new Tabulator("#tabla-categorias", {
+    ajaxURL: "/Categorias/ObtenerTodas",
+    layout: "fitColumns",
+    placeholder: "No hay categorías registradas",
+    pagination: "local",
+    paginationSize: 10,
+    columns: [
+        { title: "#",       field: "id",     width: 60, hozAlign: "center" },
+        { title: "Nombre",  field: "nombre", widthGrow: 1 },
+        {
+            title: "Acciones",
+            hozAlign: "center",
+            width: 160,
+            formatter: function (cell) {
+                return `<div class="flex gap-2 justify-center">
+                    <button onclick="editar(${cell.getRow().getData().id}, '${cell.getRow().getData().nombre}')"
+                        class="bg-yellow-400 hover:bg-yellow-500 text-white text-xs px-3 py-1 rounded-md">✏️ Editar</button>
+                    <button onclick="eliminar(${cell.getRow().getData().id})"
+                        class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 rounded-md">🗑 Eliminar</button>
+                </div>`;
+            }
+        }
+    ]
+});
+
+// ── Modal ────────────────────────────────────────────────────
+function abrirModal(id = 0, nombre = "") {
+    $("#inp-id").val(id);
+    $("#inp-nombre").val(nombre);
+    $("#modal-titulo").text(id === 0 ? "Nueva Categoría" : "Editar Categoría");
+    $("#err-nombre").addClass("hidden");
+    $("#modal").removeClass("hidden");
+}
+
+function cerrarModal() { $("#modal").addClass("hidden"); }
+
+function editar(id, nombre) { abrirModal(id, nombre); }
+
+// ── Guardar (POST) ────────────────────────────────────────────
+function guardar() {
+    var nombre = $("#inp-nombre").val().trim();
+    if (!nombre) { $("#err-nombre").removeClass("hidden"); return; }
+    $("#err-nombre").addClass("hidden");
+
+    $.ajax({
+        url: "/Categorias/Guardar",
+        method: "POST",
+        contentType: "application/json",
+        data: JSON.stringify({ id: parseInt($("#inp-id").val()), nombre: nombre }),
+        success: function (res) {
+            cerrarModal();
+            tabla.setData();           // recargar tabla
+            mostrarToast(res.mensaje, "exito");
+        },
+        error: function (xhr) {
+            mostrarToast("Error al guardar: " + xhr.responseText, "error");
+        }
+    });
+}
+
+// ── Eliminar (DELETE) ─────────────────────────────────────────
+function eliminar(id) {
+    if (!confirm("¿Eliminar esta categoría?")) return;
+    $.ajax({
+        url: "/Categorias/Eliminar/" + id,
+        method: "DELETE",
+        success: function (res) {
+            tabla.setData();
+            mostrarToast(res.mensaje, "exito");
+        },
+        error: function (xhr) {
+            var msg = xhr.responseJSON?.mensaje || "Error al eliminar";
+            mostrarToast(msg, "error");
+        }
+    });
+}
+
+// ── Toast de notificación ─────────────────────────────────────
+function mostrarToast(mensaje, tipo) {
+    var color = tipo === "exito" ? "bg-green-500" : "bg-red-500";
+    var toast = $(`<div class="fixed bottom-6 right-6 ${color} text-white px-5 py-3 rounded-xl shadow-lg text-sm z-50">${mensaje}</div>`);
+    $("body").append(toast);
+    setTimeout(() => toast.fadeOut(400, () => toast.remove()), 3000);
+}
+</script>
+}

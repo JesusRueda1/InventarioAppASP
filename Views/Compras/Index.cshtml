@@ -1,0 +1,205 @@
+@{
+    ViewData["Title"] = "Gestión de Compras";
+    var productos = ViewBag.Productos as List<InventarioApp.Models.Producto> ?? new();
+}
+
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+
+    <!-- ── Columna izquierda: Formulario nueva compra ── -->
+    <div class="bg-white rounded-xl shadow p-6">
+        <h2 class="text-base font-semibold text-gray-700 mb-4">📥 Registrar Nueva Compra</h2>
+
+        <div class="mb-4">
+            <label class="label-f">Proveedor (opcional)</label>
+            <input id="proveedor" type="text" placeholder="Nombre del proveedor"
+                   class="input-f" />
+        </div>
+
+        <!-- Agregar productos al detalle -->
+        <div class="border border-gray-200 rounded-lg p-4 mb-4 bg-gray-50">
+            <p class="text-sm font-medium text-gray-600 mb-3">Agregar producto</p>
+            <div class="flex gap-2 flex-wrap">
+                <select id="sel-producto" class="input-f flex-1 min-w-[160px]">
+                    <option value="">-- Producto --</option>
+                    @foreach (var p in productos)
+                    {
+                        <option value="@p.Id" data-precio="@p.Precio">@p.Nombre</option>
+                    }
+                </select>
+                <input id="inp-cant" type="number" min="1" value="1" placeholder="Cant." class="input-f w-20" />
+                <input id="inp-costo" type="number" step="0.01" min="0" placeholder="Costo unit." class="input-f w-28" />
+                <button onclick="agregarItem()"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-4 py-2 rounded-lg transition whitespace-nowrap">
+                    + Agregar
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabla de detalle -->
+        <div class="overflow-x-auto mb-4">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-100 text-gray-600">
+                    <tr>
+                        <th class="px-3 py-2 text-left">Producto</th>
+                        <th class="px-3 py-2 text-center">Cant.</th>
+                        <th class="px-3 py-2 text-right">Costo</th>
+                        <th class="px-3 py-2 text-right">Subtotal</th>
+                        <th class="px-3 py-2"></th>
+                    </tr>
+                </thead>
+                <tbody id="detalle-body">
+                    <tr id="row-empty">
+                        <td colspan="5" class="text-center py-4 text-gray-400">No hay productos agregados</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr class="border-t border-gray-200 font-semibold">
+                        <td colspan="3" class="px-3 py-2 text-right text-gray-600">Total:</td>
+                        <td class="px-3 py-2 text-right text-indigo-700 text-base" id="total-compra">$0.00</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <button onclick="registrarCompra()"
+                class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 rounded-lg transition text-sm">
+            ✅ Registrar Compra
+        </button>
+    </div>
+
+    <!-- ── Columna derecha: Historial de compras ── -->
+    <div class="bg-white rounded-xl shadow p-6">
+        <h2 class="text-base font-semibold text-gray-700 mb-4">📋 Historial de Compras</h2>
+        <div id="tabla-compras"></div>
+    </div>
+</div>
+
+<!-- Modal: Detalle de compra -->
+<div id="modal-detalle" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6">
+        <h3 class="text-base font-semibold mb-4">📋 Detalle de Compra</h3>
+        <div id="detalle-modal-content"></div>
+        <div class="flex justify-end mt-4">
+            <button onclick="$('#modal-detalle').addClass('hidden')"
+                    class="px-4 py-2 text-sm border rounded-lg hover:bg-gray-100">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .label-f { display:block; font-size:.875rem; font-weight:500; color:#374151; margin-bottom:.25rem; }
+    .input-f  { width:100%; border:1px solid #d1d5db; border-radius:.5rem; padding:.5rem .75rem; font-size:.875rem; }
+    .input-f:focus { outline:none; box-shadow:0 0 0 2px #6366f1; }
+</style>
+
+@section Scripts {
+<script>
+var detalleCompra = [];   // arreglo de items del formulario
+
+// ── Tabla historial ──────────────────────────────────────────
+var tablaH = new Tabulator("#tabla-compras", {
+    ajaxURL: "/Compras/ObtenerTodas",
+    layout: "fitColumns",
+    pagination: "local",
+    paginationSize: 8,
+    placeholder: "Sin compras registradas",
+    columns: [
+        { title: "#",          field: "id",         width: 55 },
+        { title: "Fecha",      field: "fecha",       widthGrow: 1 },
+        { title: "Proveedor",  field: "proveedor",   widthGrow: 1 },
+        { title: "Total",      field: "total",       width: 100, hozAlign: "right",
+          formatter: "money", formatterParams: { symbol: "$", precision: 2 } },
+        { title: "", width: 80, hozAlign: "center",
+          formatter: function(cell) {
+              return `<button onclick="verDetalle(${cell.getRow().getData().id})"
+                  class="text-indigo-600 hover:underline text-xs">Ver</button>`;
+          }
+        }
+    ]
+});
+
+// ── Agregar item al detalle ──────────────────────────────────
+function agregarItem() {
+    var sel    = $("#sel-producto option:selected");
+    var pid    = parseInt($("#sel-producto").val());
+    var pnom   = sel.text();
+    var cant   = parseInt($("#inp-cant").val());
+    var costo  = parseFloat($("#inp-costo").val());
+
+    if (!pid || cant < 1 || isNaN(costo) || costo < 0) {
+        alert("Completa todos los campos del producto."); return;
+    }
+
+    detalleCompra.push({ productoId: pid, nombre: pnom, cantidad: cant, precioCosto: costo });
+    renderDetalle();
+    $("#sel-producto").val(""); $("#inp-cant").val(1); $("#inp-costo").val("");
+}
+
+// Auto-rellenar costo con el precio del producto
+$("#sel-producto").on("change", function() {
+    var precio = $(this).find("option:selected").data("precio");
+    if (precio) $("#inp-costo").val(precio);
+});
+
+function renderDetalle() {
+    var body = $("#detalle-body"); body.empty();
+    if (detalleCompra.length === 0) {
+        body.html('<tr id="row-empty"><td colspan="5" class="text-center py-4 text-gray-400">No hay productos agregados</td></tr>');
+        $("#total-compra").text("$0.00"); return;
+    }
+    var total = 0;
+    detalleCompra.forEach(function(item, i) {
+        var sub = item.cantidad * item.precioCosto;
+        total += sub;
+        body.append(`<tr class="border-t border-gray-100">
+            <td class="px-3 py-2">${item.nombre}</td>
+            <td class="px-3 py-2 text-center">${item.cantidad}</td>
+            <td class="px-3 py-2 text-right">$${item.precioCosto.toFixed(2)}</td>
+            <td class="px-3 py-2 text-right">$${sub.toFixed(2)}</td>
+            <td class="px-3 py-2 text-center">
+                <button onclick="quitarItem(${i})" class="text-red-500 hover:text-red-700 text-xs">✕</button>
+            </td>
+        </tr>`);
+    });
+    $("#total-compra").text("$" + total.toFixed(2));
+}
+
+function quitarItem(i) { detalleCompra.splice(i, 1); renderDetalle(); }
+
+// ── Registrar compra ─────────────────────────────────────────
+function registrarCompra() {
+    if (detalleCompra.length === 0) { alert("Agrega al menos un producto."); return; }
+    $.ajax({
+        url: "/Compras/Registrar", method: "POST", contentType: "application/json",
+        data: JSON.stringify({ proveedor: $("#proveedor").val(), detalles: detalleCompra }),
+        success: function(res) {
+            mostrarToast(res.mensaje, "exito");
+            detalleCompra = []; renderDetalle();
+            $("#proveedor").val("");
+            tablaH.setData();
+        },
+        error: function(xhr) { mostrarToast(xhr.responseJSON?.mensaje || "Error", "error"); }
+    });
+}
+
+// ── Ver detalle ──────────────────────────────────────────────
+function verDetalle(id) {
+    $.get("/Compras/ObtenerDetalle/" + id, function(data) {
+        var html = '<table class="w-full text-sm"><thead class="bg-gray-100"><tr><th class="px-3 py-2 text-left">Producto</th><th class="px-3 py-2 text-center">Cant.</th><th class="px-3 py-2 text-right">Costo</th><th class="px-3 py-2 text-right">Subtotal</th></tr></thead><tbody>';
+        data.forEach(function(d) {
+            html += `<tr class="border-t"><td class="px-3 py-2">${d.productoNombre}</td><td class="px-3 py-2 text-center">${d.cantidad}</td><td class="px-3 py-2 text-right">$${d.precioCosto.toFixed(2)}</td><td class="px-3 py-2 text-right">$${d.subtotal.toFixed(2)}</td></tr>`;
+        });
+        html += '</tbody></table>';
+        $("#detalle-modal-content").html(html);
+        $("#modal-detalle").removeClass("hidden");
+    });
+}
+
+function mostrarToast(msg, tipo) {
+    var color = tipo === "exito" ? "bg-green-500" : "bg-red-500";
+    var t = $(`<div class="fixed bottom-6 right-6 ${color} text-white px-5 py-3 rounded-xl shadow-lg text-sm z-50">${msg}</div>`);
+    $("body").append(t); setTimeout(() => t.fadeOut(400, () => t.remove()), 3000);
+}
+</script>
+}
