@@ -34,10 +34,12 @@ namespace InventarioApp.Models
         [Key]
         public int Id { get; set; }
 
+        [Column("compra_id")]
         public int CompraId { get; set; }
         [ForeignKey("CompraId")]
         public Compra? Compra { get; set; }
 
+        [Column("producto_id")]
         public int ProductoId { get; set; }
         [ForeignKey("ProductoId")]
         public Producto? Producto { get; set; }
@@ -46,7 +48,7 @@ namespace InventarioApp.Models
         [Range(1, int.MaxValue)]
         public int Cantidad { get; set; }
 
-        [Column(TypeName = "decimal(10,2)")]
+        [Column("precio_costo", TypeName = "decimal(10,2)")]
         public decimal PrecioCosto { get; set; }
     }
 
@@ -74,10 +76,12 @@ namespace InventarioApp.Models
         [Key]
         public int Id { get; set; }
 
+        [Column("venta_id")]
         public int VentaId { get; set; }
         [ForeignKey("VentaId")]
         public Venta? Venta { get; set; }
 
+        [Column("producto_id")]
         public int ProductoId { get; set; }
         [ForeignKey("ProductoId")]
         public Producto? Producto { get; set; }
@@ -86,7 +90,7 @@ namespace InventarioApp.Models
         [Range(1, int.MaxValue)]
         public int Cantidad { get; set; }
 
-        [Column(TypeName = "decimal(10,2)")]
+        [Column("precio_venta", TypeName = "decimal(10,2)")]
         public decimal PrecioVenta { get; set; }
     }
 

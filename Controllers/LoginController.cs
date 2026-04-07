@@ -35,21 +35,12 @@ public class LoginController : Controller
 
         var usuario = _db.Usuarios.FirstOrDefault(u => u.Correo == model.Correo);
 
-        // ── DEBUG temporal ──────────────────────────────
-        if (usuario == null)
+        // Validar usuario y contraseña
+        if (usuario == null || !BCrypt.Net.BCrypt.Verify(model.Password, usuario.Password))
         {
-            ModelState.AddModelError("", "DEBUG: Usuario no encontrado en BD.");
+            ModelState.AddModelError("", "Correo o contraseña incorrectos.");
             return View(model);
         }
-
-        bool passwordOk = BCrypt.Net.BCrypt.Verify(model.Password, usuario.Password);
-
-        if (!passwordOk)
-        {
-            ModelState.AddModelError("", $"DEBUG: Hash en BD = {usuario.Password}");
-            return View(model);
-        }
-        // ── Fin DEBUG ───────────────────────────────────
 
         var claims = new List<Claim>
         {

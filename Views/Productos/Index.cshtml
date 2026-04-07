@@ -280,7 +280,7 @@ function guardar() {
         data: JSON.stringify({
             id: parseInt($("#inp-id").val()),
             nombre, descripcion: $("#inp-descripcion").val(),
-            precio, stock, categoria_idd: catId
+            precio, stock, categoria_id: catId
         }),
         success: function(res) {
             cerrarModal();
