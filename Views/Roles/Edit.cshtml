@@ -1,0 +1,127 @@
+@model RolEditViewModel
+@{
+    ViewData["Title"] = $"Editar Rol: {Model.RolNombre}";
+
+    // Agrupar los permisos por módulo (por el prefijo antes del punto)
+    var grupos = Model.Permisos
+        .GroupBy(p => p.Nombre.Contains('.') ? p.Nombre.Split('.')[0] : "general")
+        .OrderBy(g => g.Key)
+        .ToList();
+
+    var moduloIconos = new Dictionary<string, string>
+    {
+        ["productos"]  = "📦",
+        ["categorias"] = "🗂️",
+        ["compras"]    = "🛒",
+        ["ventas"]     = "💰",
+        ["usuarios"]   = "👥",
+        ["roles"]      = "🛡️",
+        ["general"]    = "⚙️"
+    };
+}
+
+<div class="fade-in-up max-w-3xl mx-auto">
+    <div class="bg-white rounded-2xl shadow-sm p-8">
+
+        <!-- Header -->
+        <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+            <span class="text-3xl">🛡️</span>
+            <div>
+                <h2 class="text-xl font-bold text-gray-800">Editar Rol: @Model.RolNombre</h2>
+                <p class="text-gray-400 text-sm">Selecciona los permisos que tendrá este rol</p>
+            </div>
+        </div>
+
+        <form asp-action="Edit" asp-route-id="@Model.RolId" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="RolId" />
+
+            <!-- Nombre -->
+            <div class="mb-4">
+                <label asp-for="RolNombre" class="block text-sm font-semibold text-gray-600 mb-1.5"></label>
+                <input asp-for="RolNombre"
+                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
+                       placeholder="Nombre del rol" />
+                <span asp-validation-for="RolNombre" class="text-red-500 text-xs mt-1 block"></span>
+            </div>
+
+            <!-- Descripción -->
+            <div class="mb-6">
+                <label asp-for="RolDescripcion" class="block text-sm font-semibold text-gray-600 mb-1.5"></label>
+                <input asp-for="RolDescripcion"
+                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
+                       placeholder="Descripción breve del rol" />
+            </div>
+
+            <!-- Permisos agrupados por módulo -->
+            <p class="text-sm font-semibold text-gray-600 mb-3">Permisos del Rol</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                @for (int g = 0; g < grupos.Count; g++)
+                {
+                    var grupo = grupos[g];
+                    var icono = moduloIconos.GetValueOrDefault(grupo.Key, "⚙️");
+
+                    <div class="border border-gray-100 rounded-xl p-4 bg-gray-50">
+                        <p class="text-sm font-bold text-gray-700 mb-3 capitalize">
+                            @icono @grupo.Key
+                        </p>
+                        @foreach (var p in grupo.OrderBy(x => x.Nombre))
+                        {
+                            // Encontrar el índice en el modelo original
+                            var idx = Model.Permisos.IndexOf(p);
+                            <label class="flex items-center gap-3 mb-2 cursor-pointer group">
+                                <input type="checkbox"
+                                       name="Permisos[@idx].Seleccionado"
+                                       value="true"
+                                       @(p.Seleccionado ? "checked" : "")
+                                       class="w-4 h-4 accent-indigo-600 rounded" />
+                                <input type="hidden"
+                                       name="Permisos[@idx].PermisoId"
+                                       value="@p.PermisoId" />
+                                <input type="hidden"
+                                       name="Permisos[@idx].Nombre"
+                                       value="@p.Nombre" />
+                                <span class="text-xs font-mono text-gray-600 group-hover:text-indigo-600 transition">
+                                    @p.Nombre
+                                </span>
+                            </label>
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- Accesos rápidos -->
+            <div class="flex gap-2 mb-6">
+                <button type="button" onclick="toggleAll(true)"
+                        class="text-xs bg-green-50 hover:bg-green-100 text-green-700 px-3 py-1.5 rounded-lg transition font-medium">
+                    ✔ Marcar todos
+                </button>
+                <button type="button" onclick="toggleAll(false)"
+                        class="text-xs bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded-lg transition font-medium">
+                    ✖ Desmarcar todos
+                </button>
+            </div>
+
+            <!-- Botones -->
+            <div class="flex gap-3">
+                <button type="submit"
+                        class="btn-action flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-semibold transition">
+                    💾 Guardar Cambios
+                </button>
+                <a href="/Roles"
+                   class="btn-action flex-1 text-center bg-gray-100 hover:bg-gray-200 text-gray-600 py-2.5 rounded-xl font-semibold transition">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function toggleAll(state) {
+        document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = state);
+    }
+</script>
+}

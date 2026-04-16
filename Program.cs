@@ -16,9 +16,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        options.LoginPath  = "/Login";
-        options.LogoutPath = "/Login/Logout";
-        options.ExpireTimeSpan = TimeSpan.FromHours(8);
+        options.LoginPath       = "/Login";
+        options.LogoutPath      = "/Login/Logout";
+        options.AccessDeniedPath = "/Home/AccesoDenegado";
+        options.ExpireTimeSpan  = TimeSpan.FromHours(8);
     });
 
 // ── MVC ──────────────────────────────────────────────────────

@@ -14,14 +14,24 @@ public class Usuario
 
     [Required(ErrorMessage = "El nombre es obligatorio")]
     [StringLength(100)]
+    [Display(Name = "Nombre")]
     public string Nombre { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "El correo es obligatorio")]
     [EmailAddress]
     [StringLength(150)]
+    [Display(Name = "Correo")]
     public string Correo { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "La contraseña es obligatoria")]
     [StringLength(255)]
     public string Password { get; set; } = string.Empty;
+
+    // FK al rol asignado
+    [Column("rol_id")]
+    [Display(Name = "Rol")]
+    public int? RolId { get; set; }
+
+    [ForeignKey("RolId")]
+    public Rol? Rol { get; set; }
 }

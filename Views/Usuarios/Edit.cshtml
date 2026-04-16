@@ -1,0 +1,83 @@
+@model UsuarioEditViewModel
+@{
+    ViewData["Title"] = "Editar Usuario";
+}
+
+<div class="fade-in-up max-w-xl mx-auto">
+    <div class="bg-white rounded-2xl shadow-sm p-8">
+
+        <!-- Header -->
+        <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+            <span class="text-3xl">✏️</span>
+            <div>
+                <h2 class="text-xl font-bold text-gray-800">Editar Usuario</h2>
+                <p class="text-gray-400 text-sm">Modifica los datos del usuario. Deja la contraseña vacía para no cambiarla.</p>
+            </div>
+        </div>
+
+        <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+
+            <!-- Nombre -->
+            <div class="mb-5">
+                <label asp-for="Nombre" class="block text-sm font-semibold text-gray-600 mb-1.5"></label>
+                <input asp-for="Nombre"
+                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
+                       placeholder="Nombre completo" />
+                <span asp-validation-for="Nombre" class="text-red-500 text-xs mt-1 block"></span>
+            </div>
+
+            <!-- Correo -->
+            <div class="mb-5">
+                <label asp-for="Correo" class="block text-sm font-semibold text-gray-600 mb-1.5"></label>
+                <input asp-for="Correo" type="email"
+                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
+                       placeholder="correo@ejemplo.com" />
+                <span asp-validation-for="Correo" class="text-red-500 text-xs mt-1 block"></span>
+            </div>
+
+            <!-- Rol -->
+            <div class="mb-5">
+                <label asp-for="RolId" class="block text-sm font-semibold text-gray-600 mb-1.5"></label>
+                <select asp-for="RolId" asp-items="ViewBag.Roles"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 transition bg-white">
+                    <option value="">— Selecciona un rol —</option>
+                </select>
+                <span asp-validation-for="RolId" class="text-red-500 text-xs mt-1 block"></span>
+            </div>
+
+            <!-- Nueva contraseña (opcional) -->
+            <div class="mb-6">
+                <label asp-for="NuevoPassword" class="block text-sm font-semibold text-gray-600 mb-1.5"></label>
+                <input asp-for="NuevoPassword" type="password"
+                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
+                       placeholder="Dejar vacío para conservar la actual" />
+                <span asp-validation-for="NuevoPassword" class="text-red-500 text-xs mt-1 block"></span>
+            </div>
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="bg-red-50 border border-red-200 rounded-xl p-3 mb-4 text-sm text-red-600">
+                    @Html.ValidationSummary(true)
+                </div>
+            }
+
+            <!-- Botones -->
+            <div class="flex gap-3">
+                <button type="submit"
+                        class="btn-action flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-semibold transition">
+                    💾 Guardar Cambios
+                </button>
+                <a href="/Usuarios"
+                   class="btn-action flex-1 text-center bg-gray-100 hover:bg-gray-200 text-gray-600 py-2.5 rounded-xl font-semibold transition">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

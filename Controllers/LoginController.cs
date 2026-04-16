@@ -6,6 +6,7 @@ using InventarioApp.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace InventarioApp.Controllers;
@@ -13,13 +14,11 @@ namespace InventarioApp.Controllers;
 public class LoginController : Controller
 {
     private readonly ApplicationDbContext _db;
-
     public LoginController(ApplicationDbContext db) => _db = db;
 
     // GET /Login
     public IActionResult Index()
     {
-        // Si ya está autenticado, ir al Dashboard
         if (User.Identity?.IsAuthenticated == true)
             return RedirectToAction("Index", "Home");
 
@@ -33,21 +32,38 @@ public class LoginController : Controller
     {
         if (!ModelState.IsValid) return View(model);
 
-        var usuario = _db.Usuarios.FirstOrDefault(u => u.Correo == model.Correo);
+        // Cargar usuario con su rol y todos sus permisos
+        var usuario = await _db.Usuarios
+            .Include(u => u.Rol)
+                .ThenInclude(r => r!.RolPermisos)
+                    .ThenInclude(rp => rp.Permiso)
+            .FirstOrDefaultAsync(u => u.Correo == model.Correo);
 
-        // Validar usuario y contraseña
         if (usuario == null || !BCrypt.Net.BCrypt.Verify(model.Password, usuario.Password))
         {
             ModelState.AddModelError("", "Correo o contraseña incorrectos.");
             return View(model);
         }
 
+        // Claims base del usuario
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
             new(ClaimTypes.Name,           usuario.Nombre),
-            new(ClaimTypes.Email,          usuario.Correo)
+            new(ClaimTypes.Email,          usuario.Correo),
+            new(ClaimTypes.Role,           usuario.Rol?.Nombre ?? "Sin Rol")
         };
+
+        // Permisos del rol → cada uno se agrega como claim "Permission"
+        // Equivalente a auth()->user()->can() en Laravel
+        if (usuario.Rol?.RolPermisos != null)
+        {
+            foreach (var rp in usuario.Rol.RolPermisos)
+            {
+                if (rp.Permiso != null)
+                    claims.Add(new Claim("Permission", rp.Permiso.Nombre));
+            }
+        }
 
         var identity  = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         var principal = new ClaimsPrincipal(identity);
@@ -63,18 +79,4 @@ public class LoginController : Controller
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return RedirectToAction("Index");
     }
-
-    // // GET /Login/Seed  ← BORRAR después de usarlo
-    // public IActionResult Seed()
-    // {
-    //     var hash = BCrypt.Net.BCrypt.HashPassword("Admin123");
-    //     var usuario = _db.Usuarios.FirstOrDefault(u => u.Correo == "admin@demo.com");
-    //     if (usuario != null)
-    //     {
-    //         usuario.Password = hash;
-    //         _db.SaveChanges();
-    //         return Content($"Hash actualizado: {hash}");
-    //     }
-    //     return Content("Usuario no encontrado");
-    // }
 }

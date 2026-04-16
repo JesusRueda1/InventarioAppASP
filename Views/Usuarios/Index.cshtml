@@ -1,0 +1,89 @@
+@{
+    ViewData["Title"] = "Gestión de Usuarios";
+}
+
+<div class="fade-in-up">
+    <!-- Header -->
+    <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 flex items-center justify-between">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800">👥 Usuarios del Sistema</h2>
+            <p class="text-gray-500 text-sm mt-1">Administra los accesos y roles de cada usuario</p>
+        </div>
+        @if (User.Can("usuarios.crear"))
+        {
+            <a href="/Usuarios/Create" id="btnNuevoUsuario"
+               class="btn-action bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-semibold flex items-center gap-2 transition">
+                ➕ Nuevo Usuario
+            </a>
+        }
+    </div>
+
+    <!-- Tabla -->
+    <div class="bg-white rounded-2xl shadow-sm p-6">
+        <div id="tablaUsuarios"></div>
+    </div>
+</div>
+
+@Html.AntiForgeryToken()
+
+@section Scripts {
+<script>
+    const canEdit   = @(User.Can("usuarios.editar")   ? "true" : "false");
+    const canDelete = @(User.Can("usuarios.eliminar") ? "true" : "false");
+
+    const rolBadge = {
+        'Administrador': 'bg-purple-100 text-purple-700',
+        'Vendedor':      'bg-blue-100   text-blue-700',
+        'Bodeguero':     'bg-amber-100  text-amber-700'
+    };
+
+    const table = new Tabulator("#tablaUsuarios", {
+        ajaxURL:        "/Usuarios/ObtenerTodos",
+        layout:         "fitColumns",
+        pagination:     true,
+        paginationSize: 12,
+        placeholder:    "No hay usuarios registrados",
+        columns: [
+            { title: "#",       field: "id",     width: 60,  hozAlign: "center" },
+            { title: "Nombre",  field: "nombre", minWidth: 180 },
+            { title: "Correo",  field: "correo", minWidth: 220 },
+            {
+                title: "Rol", field: "rol", minWidth: 150,
+                formatter: function(cell) {
+                    const v   = cell.getValue() || "Sin Rol";
+                    const cls = rolBadge[v] || "bg-gray-100 text-gray-600";
+                    return `<span class="px-2.5 py-1 rounded-full text-xs font-semibold ${cls}">${v}</span>`;
+                }
+            },
+            {
+                title: "Acciones", hozAlign: "center", width: 180, headerSort: false,
+                formatter: function(cell) {
+                    const id  = cell.getRow().getData().id;
+                    const out = [];
+                    if (canEdit)
+                        out.push(`<a href="/Usuarios/Edit/${id}" class="text-blue-500 hover:text-blue-700 font-medium mx-1 text-sm">✏️ Editar</a>`);
+                    if (canDelete)
+                        out.push(`<button onclick="eliminar(${id})" class="text-red-400 hover:text-red-600 font-medium mx-1 text-sm">🗑️ Eliminar</button>`);
+                    return out.length ? out.join('') : '<span class="text-gray-300 text-xs">—</span>';
+                }
+            }
+        ]
+    });
+
+    async function eliminar(id) {
+        const r = await Swal2.delete({ title: '¿Eliminar usuario?', text: 'Esta acción no se puede deshacer.' });
+        if (!r.isConfirmed) return;
+
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '';
+        const res   = await fetch(`/Usuarios/Delete/${id}`, {
+            method: 'POST',
+            headers: { 'RequestVerificationToken': token }
+        });
+        const data = await res.json();
+
+        data.ok
+            ? (Toast.success('Eliminado', data.mensaje), table.replaceData())
+            : Toast.error('Error', data.mensaje);
+    }
+</script>
+}

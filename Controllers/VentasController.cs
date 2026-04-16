@@ -1,7 +1,9 @@
 // ============================================================
 // Controllers/VentasController.cs  –  POS de ventas
 // ============================================================
+using InventarioApp.Authorization;
 using InventarioApp.Data;
+using InventarioApp.Extensions;
 using InventarioApp.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,6 +18,7 @@ public class VentasController : Controller
     public VentasController(ApplicationDbContext db) => _db = db;
 
     // GET /Ventas
+    [RequirePermission("ventas.ver")]
     public async Task<IActionResult> Index()
     {
         ViewBag.Productos = await _db.Productos.Where(p => p.Stock > 0).ToListAsync();
@@ -24,21 +27,30 @@ public class VentasController : Controller
 
     // GET /Ventas/ObtenerTodas
     [HttpGet]
+    [RequirePermission("ventas.ver")]
     public async Task<IActionResult> ObtenerTodas()
     {
-        var lista = await _db.Ventas
-            .OrderByDescending(v => v.Fecha)
-            .Select(v => new { v.Id, Fecha = v.Fecha.ToString("dd/MM/yyyy HH:mm"), v.Total })
+        var lista = await _db.Transacciones
+            .Where(t => t.Tipo == TipoTransaccion.Venta)
+            .OrderByDescending(t => t.Fecha)
+            .Select(t => new
+            {
+                t.Id,
+                Fecha = t.Fecha.ToString("dd/MM/yyyy HH:mm"),
+                t.Total
+            })
             .ToListAsync();
+
         return Json(lista);
     }
 
     // GET /Ventas/ObtenerDetalle/5
     [HttpGet]
+    [RequirePermission("ventas.ver")]
     public async Task<IActionResult> ObtenerDetalle(int id)
     {
         var detalle = await _db.DetalleVentas
-            .Where(d => d.VentaId == id)
+            .Where(d => d.TransaccionId == id)
             .Include(d => d.Producto)
             .Select(d => new
             {
@@ -46,7 +58,9 @@ public class VentasController : Controller
                 d.Cantidad,
                 d.PrecioVenta,
                 Subtotal = d.Cantidad * d.PrecioVenta
-            }).ToListAsync();
+            })
+            .ToListAsync();
+
         return Json(detalle);
     }
 
@@ -59,11 +73,13 @@ public class VentasController : Controller
             .Select(p => new { p.Id, p.Nombre, p.Precio, p.Stock })
             .Take(10)
             .ToListAsync();
+
         return Json(productos);
     }
 
     // POST /Ventas/Registrar
     [HttpPost]
+    [RequirePermission("ventas.registrar")]
     public async Task<IActionResult> Registrar([FromBody] VentaDto dto)
     {
         if (dto.Detalles == null || !dto.Detalles.Any())
@@ -79,22 +95,25 @@ public class VentasController : Controller
                 return BadRequest(new { mensaje = $"Stock insuficiente para '{producto.Nombre}'." });
         }
 
-        var venta = new Venta
+        var transaccion = new Transaccion
         {
-            Fecha = DateTime.Now,
-            Total = dto.Detalles.Sum(d => d.Cantidad * d.PrecioVenta)
+            Tipo      = TipoTransaccion.Venta,
+            Fecha     = DateTime.Now,
+            Total     = dto.Detalles.Sum(d => d.Cantidad * d.PrecioVenta),
+            UsuarioId = User.UserId()
         };
-        _db.Ventas.Add(venta);
+
+        _db.Transacciones.Add(transaccion);
         await _db.SaveChangesAsync();
 
         foreach (var item in dto.Detalles)
         {
             _db.DetalleVentas.Add(new DetalleVenta
             {
-                VentaId     = venta.Id,
-                ProductoId  = item.ProductoId,
-                Cantidad    = item.Cantidad,
-                PrecioVenta = item.PrecioVenta
+                TransaccionId = transaccion.Id,
+                ProductoId    = item.ProductoId,
+                Cantidad      = item.Cantidad,
+                PrecioVenta   = item.PrecioVenta
             });
 
             var producto = await _db.Productos.FindAsync(item.ProductoId);
@@ -102,7 +121,7 @@ public class VentasController : Controller
         }
 
         await _db.SaveChangesAsync();
-        return Ok(new { mensaje = "Venta registrada", id = venta.Id, total = venta.Total });
+        return Ok(new { mensaje = "Venta registrada", id = transaccion.Id, total = transaccion.Total });
     }
 }
 
