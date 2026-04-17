@@ -18,6 +18,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Usuario>       Usuarios       { get; set; }
     public DbSet<Categoria>     Categorias     { get; set; }
     public DbSet<Producto>      Productos      { get; set; }
+    public DbSet<Impuesto>      Impuestos      { get; set; }
 
     // ── Roles y Permisos ──────────────────────────────────────
     public DbSet<Rol>           Roles          { get; set; }
@@ -28,6 +29,11 @@ public class ApplicationDbContext : DbContext
     public DbSet<Transaccion>   Transacciones  { get; set; }
     public DbSet<DetalleCompra> DetalleCompras { get; set; }
     public DbSet<DetalleVenta>  DetalleVentas  { get; set; }
+
+    // ── ERP (Kardex, Cuentas, Actividad) ──────────────────────
+    public DbSet<MovimientoKardex> MovimientosKardex { get; set; }
+    public DbSet<Pago>             Pagos             { get; set; }
+    public DbSet<AuditoriaLog>     AuditoriaLogs     { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -45,11 +51,29 @@ public class ApplicationDbContext : DbContext
             .HasForeignKey(p => p.categoria_id)
             .OnDelete(DeleteBehavior.Restrict);
 
+        // ── Producto → Impuesto ────────────────────────────────
+        modelBuilder.Entity<Producto>()
+            .HasOne(p => p.Impuesto)
+            .WithMany()
+            .HasForeignKey(p => p.ImpuestoId)
+            .OnDelete(DeleteBehavior.SetNull);
+
         // ── Transaccion: guardar enum como string ─────────────
         modelBuilder.Entity<Transaccion>()
             .Property(t => t.Tipo)
             .HasConversion<string>()
-            .HasMaxLength(10);
+            .HasMaxLength(15);
+
+        modelBuilder.Entity<Transaccion>()
+            .Property(t => t.EstadoPago)
+            .HasConversion<string>()
+            .HasMaxLength(15);
+
+        // ── Kardex: guardar enum como string ─────────────
+        modelBuilder.Entity<MovimientoKardex>()
+            .Property(m => m.Tipo)
+            .HasConversion<string>()
+            .HasMaxLength(15);
 
         // ── Usuario → Rol ──────────────────────────────────────
         modelBuilder.Entity<Usuario>()
@@ -74,6 +98,13 @@ public class ApplicationDbContext : DbContext
             .HasOne(d => d.Transaccion)
             .WithMany(t => t.DetallesVenta)
             .HasForeignKey(d => d.TransaccionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // ── Transaccion → Pagos ────────────────────────────────
+        modelBuilder.Entity<Pago>()
+            .HasOne(p => p.Transaccion)
+            .WithMany(t => t.Pagos)
+            .HasForeignKey(p => p.TransaccionId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

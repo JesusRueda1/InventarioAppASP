@@ -18,8 +18,9 @@ public class ProductosController : Controller
     // GET /Productos
     public async Task<IActionResult> Index()
     {
-        // Pasamos las categorías para el <select> del formulario
+        // Pasamos las categorías e impuestos para los <select> del formulario
         ViewBag.Categorias = await _db.Categorias.ToListAsync();
+        ViewBag.Impuestos = await _db.Impuestos.ToListAsync();
         return View();
     }
 
@@ -30,7 +31,7 @@ public class ProductosController : Controller
     public async Task<IActionResult> ObtenerTodos(string? busqueda)
     {
         // return Json([]);
-        var query = _db.Productos.Include(p => p.Categoria).AsQueryable();
+        var query = _db.Productos.Include(p => p.Categoria).Include(p => p.Impuesto).AsQueryable();
 
         // query
         // Console.WriteLine(query);
@@ -46,7 +47,9 @@ public class ProductosController : Controller
             p.Precio,
             p.Stock,
             p.categoria_id,
+            p.ImpuestoId,
             CategoriaNombre = p.Categoria != null ? p.Categoria.Nombre : "—",
+            Impuesto = p.Impuesto != null ? $"{p.Impuesto.Nombre} ({p.Impuesto.Porcentaje}%)" : "Ninguno",
             StockBajo = p.Stock < 5
         }).ToListAsync();
 
@@ -61,16 +64,50 @@ public class ProductosController : Controller
             return BadRequest(ModelState);
 
         if (model.Id == 0)
+        {
             _db.Productos.Add(model);
+            if (model.Stock > 0)
+            {
+                // Generar Kardex automático de inventario inicial
+                _db.MovimientosKardex.Add(new MovimientoKardex
+                {
+                    Producto = model,
+                    Fecha = DateTime.Now,
+                    Tipo = TipoMovimientoKardex.Ingreso,
+                    Cantidad = model.Stock,
+                    Saldo = model.Stock,
+                    Motivo = "Inventario inicial al crear el producto",
+                    TransaccionId = null
+                });
+            }
+        }
         else
         {
             var existente = await _db.Productos.FindAsync(model.Id);
             if (existente == null) return NotFound();
+            
+            // Evaluamos si el stock fue tocado a mano
+            if (existente.Stock != model.Stock)
+            {
+                int diff = model.Stock - existente.Stock;
+                _db.MovimientosKardex.Add(new MovimientoKardex
+                {
+                    ProductoId = existente.Id,
+                    Fecha = DateTime.Now,
+                    Tipo = diff > 0 ? TipoMovimientoKardex.Ingreso : TipoMovimientoKardex.Egreso,
+                    Cantidad = Math.Abs(diff),
+                    Saldo = model.Stock,
+                    Motivo = "Ajuste directo desde edición de producto",
+                    TransaccionId = null
+                });
+            }
+
             existente.Nombre      = model.Nombre;
             existente.Descripcion = model.Descripcion;
             existente.Precio      = model.Precio;
             existente.Stock       = model.Stock;
             existente.categoria_id = model.categoria_id;
+            existente.ImpuestoId   = model.ImpuestoId;
         }
 
         await _db.SaveChangesAsync();

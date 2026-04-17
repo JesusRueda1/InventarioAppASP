@@ -1,0 +1,168 @@
+@model IEnumerable<InventarioApp.Models.Transaccion>
+@{
+    ViewData["Title"] = "Gestión de Cartera y Pagos";
+}
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Lista de deudas consolidadas -->
+    <div class="lg:col-span-2">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-lg bg-red-100 text-red-600 flex items-center justify-center">
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                    </span>
+                    Cartera Activa (CxC / CxP)
+                </h3>
+            </div>
+
+            <div class="overflow-x-auto w-full border border-gray-100 rounded-xl">
+                <table class="w-full text-sm text-left">
+                    <thead class="text-xs text-gray-400 bg-gray-50 uppercase border-b border-gray-100">
+                        <tr>
+                            <th class="px-4 py-4">Transacción</th>
+                            <th class="px-4 py-4">Sujeto</th>
+                            <th class="px-4 py-4 text-right">Total Factura</th>
+                            <th class="px-4 py-4 text-right font-black text-red-500">Saldo Pendiente</th>
+                            <th class="px-4 py-4 text-center">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50 text-gray-600">
+                        @if(!Model.Any()) {
+                            <tr><td colspan="5" class="py-10 text-center text-emerald-500 font-medium">¡Excelente! Tu contabilidad está al día. No existen facturas ni reciberas por saldar.</td></tr>
+                        }
+                        @foreach(var t in Model)
+                        {
+                            <tr class="hover:bg-gray-50 transition cursor-pointer" onclick="verDetalles(@t.Id)">
+                                <td class="px-4 py-3">
+                                    <span class="font-bold text-gray-800">#@t.Id</span>
+                                    <div class="text-[10px] uppercase font-bold @(t.Tipo == InventarioApp.Models.TipoTransaccion.Venta ? "text-emerald-500" : "text-amber-500") mt-0.5">
+                                        @t.Tipo
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 font-medium text-gray-700">
+                                    @(t.Proveedor ?? "Cliente Mostrador")
+                                </td>
+                                <td class="px-4 py-3 text-right">
+                                    $@t.Total.ToString("N2")
+                                </td>
+                                <td class="px-4 py-3 text-right font-black text-red-500">
+                                    $@t.SaldoPendiente.ToString("N2")
+                                </td>
+                                <td class="px-4 py-3 text-center">
+                                    <button class="bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm" onclick="event.stopPropagation(); abonarA(@t.Id, @t.SaldoPendiente)">
+                                        Abonar
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visor Inspector -->
+    <div class="lg:col-span-1 space-y-6">
+        
+        <!-- Tarjeta de Detalles del Abono -->
+        <div class="bg-gray-900 border-gray-800 text-white rounded-2xl shadow-xl p-6 relative overflow-hidden" id="visor-detalles">
+            <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/5 rounded-full pointer-events-none"></div>
+            
+            <p class="text-xs text-indigo-300 font-bold tracking-widest uppercase mb-1 drop-shadow">Inspector Contable</p>
+            <h4 class="text-3xl font-black mb-6 flex gap-2">T-#<span id="insp-id">---</span></h4>
+
+            <div class="space-y-4 text-sm font-medium">
+                <div class="flex justify-between border-b border-gray-700 pb-2">
+                    <span class="text-gray-400">Total Inicial:</span>
+                    <span id="insp-total" class="font-bold">$0.00</span>
+                </div>
+                <div class="flex justify-between border-b border-gray-700 pb-2">
+                    <span class="text-gray-400">Deuda Restante:</span>
+                    <span id="insp-saldo" class="font-bold text-red-400">$0.00</span>
+                </div>
+                <div class="flex justify-between border-b border-gray-700 pb-2">
+                    <span class="text-gray-400">Estado:</span>
+                    <span id="insp-estado" class="font-black text-amber-400 uppercase">---</span>
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <p class="text-xs text-gray-500 font-bold mb-2 uppercase tracking-wide">Registro de Pagos Históricos</p>
+                <div class="space-y-2 max-h-40 overflow-y-auto" id="insp-pagosList">
+                    <p class="text-xs text-gray-600 italic">Selecciona una transacción en la tabla izquierda para ver el historial de sus abonos.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function verDetalles(id) {
+            $.get("/Pagos/DetalleTransaccion/" + id, function(res) {
+                $("#insp-id").text(res.id);
+                $("#insp-total").text('$' + res.total.toFixed(2));
+                $("#insp-saldo").text('$' + res.saldoPendiente.toFixed(2));
+                $("#insp-estado").text(res.estadoPago);
+                
+                let pagosHtml = "";
+                if(res.pagos.length === 0){
+                    pagosHtml = '<p class="text-xs text-gray-600 italic">No existen abonos aún.</p>';
+                } else {
+                    res.pagos.forEach(p => {
+                        pagosHtml += `<div class="flex justify-between text-xs p-2 rounded bg-gray-800 border border-gray-700 shadow-sm">
+                            <span class="text-gray-400">${p.fecha} <br/ ><b class="text-indigo-300">Via ${p.metodoPago}</b></span>
+                            <span class="text-emerald-400 font-bold">+$${p.monto.toFixed(2)}</span>
+                        </div>`;
+                    });
+                }
+                $("#insp-pagosList").html(pagosHtml);
+            });
+        }
+
+        function abonarA(id, saldo) {
+            Swal.fire({
+                title: 'Ingresar Abono a T-#' + id,
+                html: `
+                    <div class="mb-4">
+                        <label class="block text-sm text-left font-bold text-gray-700 mb-1">Monto a abonar (Max $${saldo.toFixed(2)})</label>
+                        <input type="number" id="ab-monto" min="0.01" step="0.01" max="${saldo}" value="${saldo}" class="w-full border-2 border-gray-200 rounded-lg p-2 font-bold text-lg focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-left font-bold text-gray-700 mb-1">Metodo de Pago</label>
+                        <select id="ab-metodo" class="w-full border-2 border-gray-200 rounded-lg p-2 font-medium focus:outline-none focus:border-indigo-500">
+                            <option value="Efectivo">Efectivo 💵</option>
+                            <option value="Transferencia">Transferencia Bancaria 🏦</option>
+                            <option value="Tarjeta">Tarjeta de Débito/Crédito 💳</option>
+                        </select>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonColor: '#4f46e5',
+                confirmButtonText: 'Saldar / Abonar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var monto = parseFloat(document.getElementById('ab-monto').value);
+                    var metodo = document.getElementById('ab-metodo').value;
+
+                    $.ajax({
+                        url: '/Pagos/Abonar',
+                        method: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ transaccionId: id, monto: monto, metodoPago: metodo }),
+                        success: function(res) {
+                            Toast.success('Aprobado', res.mensaje);
+                            setTimeout(() => location.reload(), 1500); // Recargar página rápido para actualizar
+                        },
+                        error: function(err) {
+                            Swal2.error({ title: 'Cancelado', text: err.responseJSON?.mensaje || 'Ocurrió un error.'});
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+}

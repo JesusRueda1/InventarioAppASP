@@ -22,8 +22,14 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.ExpireTimeSpan  = TimeSpan.FromHours(8);
     });
 
+// ── Registro de Filtros ──────────────────────────────────────
+builder.Services.AddScoped<InventarioApp.Filters.AuditoriaFilter>();
+
 // ── MVC ──────────────────────────────────────────────────────
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.AddService<InventarioApp.Filters.AuditoriaFilter>();
+});
 
 // ── Sesión (usada para el carrito del POS) ────────────────────
 builder.Services.AddSession(options =>

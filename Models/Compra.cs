@@ -29,10 +29,18 @@ namespace InventarioApp.Models
 
         [Required]
         [Range(1, int.MaxValue)]
+        [Column("cantidad")]
         public int Cantidad { get; set; }
 
         [Column("precio_costo", TypeName = "decimal(10,2)")]
         public decimal PrecioCosto { get; set; }
+
+        // Impuestos históricos al momento de la compra
+        [Column("porcentaje_impuesto", TypeName = "decimal(5,2)")]
+        public decimal PorcentajeImpuesto { get; set; }
+
+        [Column("monto_impuesto", TypeName = "decimal(10,2)")]
+        public decimal MontoImpuesto { get; set; }
     }
 
     // ── Línea de detalle de venta ────────────────────────────
@@ -57,10 +65,17 @@ namespace InventarioApp.Models
 
         [Required]
         [Range(1, int.MaxValue)]
+        [Column("cantidad")]
         public int Cantidad { get; set; }
 
         [Column("precio_venta", TypeName = "decimal(10,2)")]
         public decimal PrecioVenta { get; set; }
+
+        // Impuestos históricos al momento de la venta
+        [Column("porcentaje_impuesto", TypeName = "decimal(5,2)")]
+        public decimal PorcentajeImpuesto { get; set; }
+
+        [Column("monto_impuesto", TypeName = "decimal(10,2)")]
+        public decimal MontoImpuesto { get; set; }
     }
 }
-

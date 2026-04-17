@@ -145,9 +145,12 @@
             <h3 class="text-2xl font-bold text-gray-800 mb-2">Venta Exitosa!</h3>
             <p id="comp-total" class="text-4xl font-bold text-emerald-600 mb-4"></p>
             <p class="text-sm text-gray-500 bg-gray-100 rounded-xl py-2 px-4 inline-block" id="comp-info"></p>
+            <div class="mt-6 grid grid-cols-2 gap-2" id="comp-actions">
+                <!-- Se inyecta por JS -->
+            </div>
             <button onclick="cerrarComprobante()"
-                    class="mt-6 w-full btn-action bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-3 rounded-xl transition shadow-lg">
-                Continuar
+                    class="mt-3 w-full btn-action bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 rounded-xl transition shadow-sm">
+                Nueva Venta
             </button>
         </div>
     </div>
@@ -178,6 +181,19 @@ var tablaV = new Tabulator("#tabla-ventas", {
         { title: "Total", field: "total", width: 90, hozAlign: "right",
           formatter: function(cell) {
               return `<span class="font-bold text-emerald-600">$${parseFloat(cell.getValue()).toFixed(2)}</span>`;
+          }
+        },
+        { title: "", hozAlign: "center", width: 80,
+          formatter: function(cell) {
+              var id = cell.getRow().getData().id;
+              return `<div class="flex gap-1 justify-center">
+                  <a href="/Ventas/Ticket/${id}" target="_blank" title="Imprimir Ticket" class="w-7 h-7 rounded bg-indigo-50 text-indigo-600 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition cursor-pointer">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                  </a>
+                  <a href="/Ventas/Factura/${id}" target="_blank" title="Factura A4" class="w-7 h-7 rounded bg-purple-50 text-purple-600 flex items-center justify-center hover:bg-purple-600 hover:text-white transition cursor-pointer">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                  </a>
+              </div>`;
           }
         }
     ]
@@ -357,6 +373,18 @@ function procesarVenta() {
                 success: function(res) {
                     $("#comp-total").text("$" + parseFloat(res.total).toFixed(2));
                     $("#comp-info").text("Venta #" + res.id + " registrada correctamente");
+
+                    $("#comp-actions").html(`
+                        <a href="/Ventas/Ticket/${res.id}" target="_blank" class="flex flex-col items-center justify-center p-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl transition border border-indigo-100">
+                            <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                            <span class="text-xs font-bold">Ticket POS</span>
+                        </a>
+                        <a href="/Ventas/Factura/${res.id}" target="_blank" class="flex flex-col items-center justify-center p-3 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-xl transition border border-purple-100">
+                            <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            <span class="text-xs font-bold">Factura A4</span>
+                        </a>
+                    `);
+
                     $("#modal-comprobante").addClass("active");
                     carrito = []; 
                     renderCarrito();

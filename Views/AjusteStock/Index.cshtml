@@ -1,0 +1,121 @@
+@model IEnumerable<InventarioApp.Models.MovimientoKardex>
+@{
+    ViewData["Title"] = "Transacciones Kárdex / Ajuste";
+    var productos = ViewBag.Productos as List<InventarioApp.Models.Producto> ?? new();
+}
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Formulario de Ajuste Manual -->
+    <div class="lg:col-span-1">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <span class="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center">
+                    <i class="fa-solid fa-boxes-packing"></i>
+                </span>
+                Nuevo Ajuste de Stock
+            </h3>
+
+            <p class="text-sm text-gray-500 mb-6 leading-relaxed">
+                Alterará el Kardex del producto de forma justificada. No elimine stock mediante Compras o Ventas ficticias.
+            </p>
+
+            <form asp-action="Guardar" method="post" class="space-y-4">
+                @Html.AntiForgeryToken()
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Carga Artículo</label>
+                    <select name="productoId" required class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500 appearance-none bg-white">
+                        <option value="">Seleccione...</option>
+                        @foreach(var p in productos)
+                        {
+                            <option value="@p.Id">@p.Nombre (Saldo Actual: @p.Stock)</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Movimiento</label>
+                        <select name="tipo" required class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white">
+                            <option value="Ingreso">➕ Ingreso</option>
+                            <option value="Egreso">➖ Egreso (Merma)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Cantidad</label>
+                        <input type="number" name="cantidadAjuste" min="1" placeholder="Ej: 15" required class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Justificación (Motivo)</label>
+                    <textarea name="motivo" required rows="2" placeholder="Describa por qué altera el inventario (ej. Mercancía dañada, Conteo físico 2026, etc)" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500 cursor-text resize-none"></textarea>
+                </div>
+
+                <button type="submit" class="w-full rounded-xl bg-gray-900 hover:bg-black text-white px-4 py-3 text-sm font-bold shadow-lg transition-transform hover:-translate-y-0.5 mt-2 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-file-signature"></i> Autorizar Ajuste de Kardex
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Historial Kárdex -->
+    <div class="lg:col-span-2">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 overflow-hidden flex flex-col h-full">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <span class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+                        <i class="fa-solid fa-clock-rotate-left text-indigo-600"></i>
+                    </span>
+                    Trazabilidad Reciente (Kárdex)
+                </h3>
+            </div>
+
+            <div class="overflow-y-auto w-full border border-gray-100 rounded-xl">
+                <table class="w-full text-sm text-left whitespace-nowrap">
+                    <thead class="text-xs text-gray-400 bg-gray-50 uppercase border-b border-gray-100">
+                        <tr>
+                            <th class="px-5 py-4">Fecha/Operador</th>
+                            <th class="px-5 py-4">Producto</th>
+                            <th class="px-5 py-4">Operación</th>
+                            <th class="px-5 py-4 font-bold text-gray-600">Saldo</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50">
+                        @if(!Model.Any()) {
+                            <tr><td colspan="4" class="px-5 py-10 text-center text-gray-400">El historial del Kardex está limpio. No se han detectado transacciones físicas de cajas.</td></tr>
+                        }
+                        
+                        @foreach(var k in Model)
+                        {
+                            <tr class="hover:bg-gray-50/50 transition">
+                                <td class="px-5 py-4">
+                                    <div class="text-gray-800 font-medium">@k.Fecha.ToString("dd MMM, HH:mm")</div>
+                                    <div class="text-xs text-indigo-400 mt-0.5"><i class="fa-solid fa-user-tag text-[10px]"></i> @(k.Usuario?.Nombre ?? "Sistema Automático")</div>
+                                </td>
+                                <td class="px-5 py-4">
+                                    <span class="font-bold text-gray-700">@(k.Producto?.Nombre ?? "N/A")</span>
+                                    <div class="text-xs text-gray-400 mt-1 max-w-[200px] truncate" title="@k.Motivo">📝 @k.Motivo</div>
+                                </td>
+                                <td class="px-5 py-4 font-medium">
+                                    @if(k.Tipo == InventarioApp.Models.TipoMovimientoKardex.Ingreso)
+                                    {
+                                        <span class="text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md text-xs font-bold">+@k.Cantidad</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-red-500 bg-red-50 px-2.5 py-1 rounded-md text-xs font-bold">-@k.Cantidad</span>
+                                    }
+                                </td>
+                                <td class="px-5 py-4 font-black text-gray-900 border-l border-gray-100">
+                                    @k.Saldo <span class="font-normal text-gray-400 text-xs ml-1">und</span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

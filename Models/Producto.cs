@@ -35,9 +35,17 @@ public class Producto
     [Display(Name = "Categoría")]
     public int categoria_id { get; set; }
 
-    // Navegación: FK hacia Categoria
+    // FK hacia Categoria
     [ForeignKey("categoria_id")]
     public Categoria? Categoria { get; set; }
+
+    // Impuesto que graba este producto
+    [Display(Name = "Impuesto")]
+    [Column("impuesto_id")]
+    public int? ImpuestoId { get; set; }
+
+    [ForeignKey("ImpuestoId")]
+    public Impuesto? Impuesto { get; set; }
 
     // Propiedad calculada: alerta de stock bajo
     [NotMapped]

@@ -1,0 +1,98 @@
+@model InventarioApp.Controllers.ReportesViewModel
+@{
+    ViewData["Title"] = "Centro de Reportes ERP";
+}
+
+<div class="mb-8">
+    <h2 class="text-3xl font-black text-gray-800 tracking-tight">Centro de Inteligencia de Negocios</h2>
+    <p class="text-gray-500 mt-2">Visión global de rentabilidad, stock, impuestos fiscales liquidados e informes de liquidez a 30 días.</p>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+    
+    <!-- Modulo 1: Stock -->
+    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden group">
+        <div class="absolute -right-4 -top-4 w-24 h-24 bg-indigo-50 rounded-full group-hover:scale-150 transition-transform duration-500 z-0"></div>
+        <div class="relative z-10">
+            <p class="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-boxes-stacked mr-1"></i> Análisis de Stock</p>
+            <p class="text-3xl font-black text-gray-800 mb-1">$@Model.ValorizacionInventario.ToString("N2")</p>
+            <p class="text-sm font-medium text-gray-500">Valorización total bodega</p>
+            <div class="mt-4 pt-4 border-t border-gray-50 flex justify-between">
+                <span class="text-xs text-red-500 font-bold bg-red-50 px-2 py-1 rounded">@Model.ProductosBajoStock en riesgo</span>
+                <span class="text-xs text-gray-400 font-medium">@Model.TotalUnidadesFisicas items físicos</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modulo 2: Contabilidad e IVA -->
+    <div class="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-2xl shadow-xl relative overflow-hidden">
+        <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-white/5 rounded-full z-0"></div>
+        <div class="relative z-10">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-scale-balanced mr-1"></i> Fiscal (mes curso)</p>
+            <p class="text-3xl font-black mb-1 text-emerald-400">$@((Model.VentasTotalesBrutas - Model.IvaPorPagar).ToString("N2"))</p>
+            <p class="text-sm font-medium text-gray-400">Ventas Netas sin IVA</p>
+            <div class="mt-4 pt-4 border-t border-gray-700 flex justify-between">
+                <span class="text-xs text-amber-400 font-bold">IVA Pagable: $@Model.IvaPorPagar.ToString("N2")</span>
+                <span class="text-xs text-emerald-300 font-medium">IVA Deducible: $@Model.IvaDescontable.ToString("N0")</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modulo 3: Tesorería (Cartera) -->
+    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden">
+        <div class="relative z-10">
+            <p class="text-xs font-bold text-red-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-hand-holding-dollar mr-1"></i> Cartera en la calle</p>
+            <p class="text-3xl font-black text-gray-800 mb-1">$@Model.CuentasPorCobrar.ToString("N2")</p>
+            <p class="text-sm font-medium text-gray-500">Deudas a nuestro favor (CxC)</p>
+            <div class="mt-4 pt-4 border-t border-gray-50">
+                <p class="text-xs text-gray-500 font-medium">Cuentas por pagar (nuestras deudas): <span class="font-bold text-red-500">$@Model.CuentasPorPagar.ToString("N2")</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modulo 4: Rendimiento Liquidez -->
+    <div class="bg-gradient-to-br from-indigo-600 to-purple-600 text-white p-6 rounded-2xl shadow-lg relative overflow-hidden">
+        <div class="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full z-0"></div>
+        <div class="relative z-10">
+            <p class="text-xs font-bold text-indigo-200 uppercase tracking-wider mb-2"><i class="fa-solid fa-coins mr-1"></i> Liquidez Real</p>
+            <p class="text-3xl font-black mb-1">$@Model.RecaudacionEfectivo.ToString("N2")</p>
+            <p class="text-sm font-medium text-indigo-100">Efectivo cobrado</p>
+            <div class="mt-4 pt-4 border-t border-white/20">
+                <p class="text-xs text-indigo-100 font-medium">Dinero pagado a caja: <span class="font-bold text-white">$@Model.EgresosPagados.ToString("N2")</span></p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Informes extra -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+    <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-center items-center text-center">
+        <i class="fa-solid fa-fingerprint text-5xl text-indigo-100 mb-4"></i>
+        <h3 class="font-bold text-lg text-gray-800">Auditoría Transaccional y de Sistemas</h3>
+        <p class="text-sm text-gray-500 mt-2 mb-6 max-w-sm">Consulte hoja por hoja quién alteró los registros, editó los roles de los empleados, o generó actas de Kardex sin autorización directa en el visor de auditoría.</p>
+        <a href="/Auditoria" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-6 py-2.5 rounded-lg transition-colors">
+            Abrir Visor Global
+        </a>
+    </div>
+    
+    <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-center items-center text-center">
+        <i class="fa-solid fa-print text-5xl text-emerald-100 mb-4"></i>
+        <h3 class="font-bold text-lg text-gray-800">Impresión de Balances</h3>
+        <p class="text-sm text-gray-500 mt-2 mb-6 max-w-sm">Procese un documento PDF imprimible sumariando todos sus activos, pasivos y patrimonios.</p>
+        <button onclick="window.print()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold px-6 py-2.5 rounded-lg transition-colors">
+            <i class="fa-solid fa-print mr-1"></i> Imprimir Reporte Actual
+        </button>
+    </div>
+</div>
+
+<style>
+    @@media print {
+        body * { visibility: hidden; }
+        .bg-gradient-to-br { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        main, main * { visibility: visible; }
+        main { position: absolute; left: 0; top: 0; width: 100%; }
+        .shadow-sm, .shadow-xl, .shadow-lg { box-shadow: none !important; border: 1px solid #ccc; }
+        a, button, .fa-print { display: none !important; }
+    }
+</style>

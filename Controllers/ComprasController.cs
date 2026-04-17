@@ -73,34 +73,78 @@ public class ComprasController : Controller
         if (dto.Detalles == null || !dto.Detalles.Any())
             return BadRequest(new { mensaje = "Agrega al menos un producto." });
 
+        decimal subtotalGlobal = 0;
+        decimal impuestoGlobal = 0;
+        var detallesAGuardar = new List<DetalleCompra>();
+        var kardexLogs = new List<MovimientoKardex>();
+
+        foreach (var item in dto.Detalles)
+        {
+            var producto = await _db.Productos.Include(p => p.Impuesto).FirstOrDefaultAsync(p => p.Id == item.ProductoId);
+            if (producto == null)
+                return BadRequest(new { mensaje = $"Producto {item.ProductoId} no encontrado." });
+
+            decimal subtotalLinea = item.Cantidad * item.PrecioCosto;
+            decimal porcImpuesto = producto.Impuesto?.Porcentaje ?? 0;
+            decimal montoImpuesto = subtotalLinea * (porcImpuesto / 100);
+
+            subtotalGlobal += subtotalLinea;
+            impuestoGlobal += montoImpuesto;
+
+            // Sumar inventario físicamente
+            producto.Stock += item.Cantidad;
+
+            detallesAGuardar.Add(new DetalleCompra
+            {
+                ProductoId = producto.Id,
+                Cantidad = item.Cantidad,
+                PrecioCosto = item.PrecioCosto,
+                PorcentajeImpuesto = porcImpuesto,
+                MontoImpuesto = montoImpuesto
+            });
+
+            kardexLogs.Add(new MovimientoKardex
+            {
+                ProductoId = producto.Id,
+                Fecha = DateTime.Now,
+                Tipo = TipoMovimientoKardex.Ingreso,
+                Cantidad = item.Cantidad,
+                Saldo = producto.Stock,
+                Motivo = $"Entrada por compra a proveedor {(dto.Proveedor ?? "Global")}",
+                UsuarioId = User.UserId()
+            });
+        }
+
         var transaccion = new Transaccion
         {
             Tipo      = TipoTransaccion.Compra,
             Fecha     = DateTime.Now,
             Proveedor = dto.Proveedor,
-            Total     = dto.Detalles.Sum(d => d.Cantidad * d.PrecioCosto),
+            Subtotal  = subtotalGlobal,
+            TotalImpuesto = impuestoGlobal,
+            Total     = subtotalGlobal + impuestoGlobal,
+            EstadoPago = EstadoPagoTransaccion.Pendiente, // Por defecto compras entran en cartera
+            SaldoPendiente = subtotalGlobal + impuestoGlobal,
             UsuarioId = User.UserId()
         };
 
         _db.Transacciones.Add(transaccion);
         await _db.SaveChangesAsync();
 
-        foreach (var item in dto.Detalles)
+        foreach (var d in detallesAGuardar)
         {
-            _db.DetalleCompras.Add(new DetalleCompra
-            {
-                TransaccionId = transaccion.Id,
-                ProductoId    = item.ProductoId,
-                Cantidad      = item.Cantidad,
-                PrecioCosto   = item.PrecioCosto
-            });
+            d.TransaccionId = transaccion.Id;
+            _db.DetalleCompras.Add(d);
+        }
 
-            var producto = await _db.Productos.FindAsync(item.ProductoId);
-            if (producto != null) producto.Stock += item.Cantidad;
+        foreach (var k in kardexLogs)
+        {
+            k.TransaccionId = transaccion.Id;
+            _db.MovimientosKardex.Add(k);
         }
 
         await _db.SaveChangesAsync();
-        return Ok(new { mensaje = "Compra registrada", id = transaccion.Id });
+        return Ok(new { mensaje = "Compra registrada", id = transaccion.Id, total = transaccion.Total });
     }
 }
 

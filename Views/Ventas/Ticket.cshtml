@@ -1,0 +1,94 @@
+@model InventarioApp.Models.Transaccion
+@{
+    Layout = null; // Quitar todo el layout gráfico lateral
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Ticket #@Model.Id</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 0;
+            background: #fff;
+            color: #000;
+            width: 80mm; /* Ancho thermal POS printers */
+            font-size: 12px;
+        }
+        .ticket-container { padding: 5px; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .font-bold { font-weight: bold; }
+        .header { margin-bottom: 10px; border-bottom: 1px dashed #000; padding-bottom: 5px; }
+        .header h1 { font-size: 16px; margin: 0; }
+        .header p { margin: 2px 0; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+        th, td { padding: 3px 0; border-bottom: 1px dotted #ccc; }
+        th { text-align: left; }
+        .totals { border-top: 1px dashed #000; padding-top: 5px; }
+        .totals p { margin: 3px 0; display: flex; justify-content: space-between; }
+        .footer { text-align: center; margin-top: 15px; font-size: 10px; }
+        
+        @@media print {
+            body { margin: 0; }
+            button { display: none; } /* Ocultar botones al imprimir */
+        }
+    </style>
+</head>
+<body>
+    <div class="ticket-container">
+        <div class="header text-center">
+            <h1>MI EMPRESA S.A.S</h1>
+            <p>NIT: 900.123.456-7</p>
+            <p>Ticket #@Model.Id.ToString("D5")</p>
+            <p>Fecha: @Model.Fecha.ToString("dd/MM/yyyy HH:mm")</p>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Cant</th>
+                    <th>Producto</th>
+                    <th class="text-right">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model.DetallesVenta)
+                {
+                    <tr>
+                        <td>@p.Cantidad</td>
+                        <td>
+                            @p.Producto?.Nombre
+                            @if(p.PorcentajeImpuesto > 0){<br><small>(IVA @p.PorcentajeImpuesto%)</small>}
+                        </td>
+                        <td class="text-right">$@((p.Cantidad * p.PrecioVenta).ToString("N2"))</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="totals font-bold">
+            <p><span>SUBTOTAL:</span> <span>$@Model.Subtotal.ToString("N2")</span></p>
+            <p><span>IMPUESTOS:</span> <span>$@Model.TotalImpuesto.ToString("N2")</span></p>
+            <p><span>TOTAL A PAGAR:</span> <span>$@Model.Total.ToString("N2")</span></p>
+        </div>
+
+        <div class="footer">
+            <p>=== GRACIAS POR SU COMPRA ===</p>
+        </div>
+
+        <button onclick="window.print()" style="margin-top: 20px; width: 100%; padding: 10px; cursor: pointer; font-weight: bold;">
+            IMPRIMIR TICKET
+        </button>
+    </div>
+    
+    <script>
+        // Imprimir automáticamente al abrir la página
+        window.onload = function() {
+            window.print();
+        }
+    </script>
+</body>
+</html>

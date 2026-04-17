@@ -206,7 +206,10 @@
             <!-- Menú de navegación -->
             <nav class="flex-1 px-4 py-6 space-y-1">
                 <a href="/Home" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-indigo-100 hover:bg-indigo-700 transition">
-                    🏠 <span>Dashboard</span>
+                    🏠 <span>Dashboard Principal</span>
+                </a>
+                <a href="/Reportes" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-indigo-100 hover:bg-indigo-700 transition">
+                    📊 <span>Inteligencia y Reportes</span>
                 </a>
                 <a href="/Categorias" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-indigo-100 hover:bg-indigo-700 transition">
                     🗂️ <span>Categorías</span>
@@ -214,6 +217,12 @@
                 <a href="/Productos" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-indigo-100 hover:bg-indigo-700 transition">
                     📋 <span>Productos</span>
                 </a>
+                @if (User.Can("kardex.ajustar"))
+                {
+                    <a href="/AjusteStock" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-indigo-100 hover:bg-indigo-700 transition">
+                        ⚖️ <span>Ajuste Kárdex</span>
+                    </a>
+                }
                 <a href="/Compras" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-indigo-100 hover:bg-indigo-700 transition">
                     🛒 <span>Compras</span>
                 </a>
@@ -221,7 +230,7 @@
                     💰 <span>POS / Ventas</span>
                 </a>
 
-                @if (User.Can("usuarios.ver") || User.Can("roles.ver"))
+                @if (User.Can("usuarios.ver") || User.Can("roles.ver") || User.Can("auditoria.ver"))
                 {
                     <div class="mt-4 pt-4 border-t border-indigo-800">
                         <p class="text-indigo-400 text-xs px-4 mb-2 uppercase tracking-wider font-semibold">Administración</p>
@@ -235,6 +244,18 @@
                         {
                             <a href="/Roles" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-indigo-100 hover:bg-indigo-700 transition">
                                 🛡️ <span>Roles y Permisos</span>
+                            </a>
+                        }
+                        @if (User.Can("auditoria.ver"))
+                        {
+                            <a href="/Auditoria" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-indigo-100 hover:bg-indigo-700 transition">
+                                🕵️‍♀️ <span>Auditoría Global</span>
+                            </a>
+                        }
+                        @if (User.Can("compras.ver") || User.Can("ventas.ver"))
+                        {
+                            <a href="/Pagos" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-indigo-100 hover:bg-indigo-700 transition">
+                                💳 <span>Cuentas por Cobrar/Pagar</span>
                             </a>
                         }
                     </div>

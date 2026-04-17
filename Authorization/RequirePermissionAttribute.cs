@@ -8,6 +8,7 @@
 // ============================================================
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using System.Security.Claims;
 
 namespace InventarioApp.Authorization;
 
@@ -26,6 +27,7 @@ public class RequirePermissionAttribute : TypeFilterAttribute
 
 /// <summary>
 /// Filtro interno que verifica el claim "Permission" del usuario.
+/// El rol "Administrador" tiene acceso total (bypass).
 /// </summary>
 public class PermissionFilter : IAuthorizationFilter
 {
@@ -47,8 +49,11 @@ public class PermissionFilter : IAuthorizationFilter
             return;
         }
 
-        // Si no tiene el permiso → Acceso Denegado (genera ForbidResult que
-        // redirige a la ruta configurada en CookieAuthentication.AccessDeniedPath)
+        // Bypass: El Administrador tiene acceso total a todos los módulos
+        if (user.IsInRole("Administrador"))
+            return;
+
+        // Si no tiene el permiso → Acceso Denegado
         if (!user.HasClaim("Permission", _permission))
         {
             context.Result = new ForbidResult();
