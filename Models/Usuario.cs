@@ -17,6 +17,13 @@ public class Usuario
     [Display(Name = "Nombre")]
     public string Nombre { get; set; } = string.Empty;
 
+    [Required(ErrorMessage = "El nombre de usuario es obligatorio")]
+    [StringLength(50, MinimumLength = 3, ErrorMessage = "El username debe tener entre 3 y 50 caracteres")]
+    [RegularExpression(@"^[a-zA-Z0-9_\.]+$", ErrorMessage = "Solo letras, números, puntos y guiones bajos")]
+    [Column("username")]
+    [Display(Name = "Nombre de usuario")]
+    public string UserName { get; set; } = string.Empty;
+
     [Required(ErrorMessage = "El correo es obligatorio")]
     [EmailAddress]
     [StringLength(150)]

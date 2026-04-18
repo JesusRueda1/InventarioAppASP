@@ -27,6 +27,19 @@
                 <span asp-validation-for="Nombre" class="text-red-500 text-xs mt-1 block"></span>
             </div>
 
+            <!-- UserName -->
+            <div class="mb-5 relative">
+                <label asp-for="UserName" class="block text-sm font-semibold text-gray-600 mb-1.5"></label>
+                <input asp-for="UserName" id="inpUserName"
+                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none transition pr-10"
+                       placeholder="Ej: juan_perez" />
+                <span asp-validation-for="UserName" class="text-red-500 text-xs mt-1 block"></span>
+                <span id="userNameFeedback" class="text-xs font-semibold mt-1 block h-4"></span>
+                <div id="userNameSpinner" class="absolute right-3 top-10 hidden animate-spin">
+                    <svg class="w-5 h-5 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                </div>
+            </div>
+
             <!-- Correo -->
             <div class="mb-5">
                 <label asp-for="Correo" class="block text-sm font-semibold text-gray-600 mb-1.5"></label>
@@ -80,4 +93,58 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const inpUserName = document.getElementById("inpUserName");
+            const feedback = document.getElementById("userNameFeedback");
+            const btnGuardar = document.getElementById("btnGuardar");
+            const spinner = document.getElementById("userNameSpinner");
+            let timeoutId;
+
+            inpUserName.addEventListener("keyup", function () {
+                clearTimeout(timeoutId);
+                const username = inpUserName.value.trim();
+
+                // Reset
+                feedback.textContent = "";
+                inpUserName.classList.remove("border-red-400", "focus:ring-red-400", "border-green-400", "focus:ring-green-400");
+                inpUserName.classList.add("border-gray-200", "focus:ring-indigo-400");
+                btnGuardar.disabled = false;
+                btnGuardar.classList.remove("opacity-50", "cursor-not-allowed");
+                spinner.classList.add("hidden");
+
+                if (username.length < 3) return;
+
+                spinner.classList.remove("hidden");
+
+                timeoutId = setTimeout(() => {
+                    fetch(`/Usuarios/VerificarUserName?username=${encodeURIComponent(username)}`)
+                        .then(response => response.json())
+                        .then(isAvailable => {
+                            spinner.classList.add("hidden");
+                            
+                            inpUserName.classList.remove("border-gray-200", "focus:ring-indigo-400");
+                            
+                            if (isAvailable) {
+                                feedback.textContent = "✓ Nombre de usuario disponible";
+                                feedback.className = "text-xs font-semibold mt-1 block h-4 text-green-500";
+                                inpUserName.classList.add("border-green-400", "focus:ring-green-400");
+                            } else {
+                                feedback.textContent = "✕ Este nombre de usuario ya está en uso";
+                                feedback.className = "text-xs font-semibold mt-1 block h-4 text-red-500";
+                                inpUserName.classList.add("border-red-400", "focus:ring-red-400");
+                                
+                                // Bloquear botón
+                                btnGuardar.disabled = true;
+                                btnGuardar.classList.add("opacity-50", "cursor-not-allowed");
+                            }
+                        })
+                        .catch(err => {
+                            spinner.classList.add("hidden");
+                            console.error("Error al verificar username", err);
+                        });
+                }, 500); // 500ms delay for performance
+            });
+        });
+    </script>
 }

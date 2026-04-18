@@ -32,16 +32,16 @@ public class LoginController : Controller
     {
         if (!ModelState.IsValid) return View(model);
 
-        // Cargar usuario con su rol y todos sus permisos
+        // Buscar usuario por username (insensible a mayúsculas para MySQL)
         var usuario = await _db.Usuarios
             .Include(u => u.Rol)
                 .ThenInclude(r => r!.RolPermisos)
                     .ThenInclude(rp => rp.Permiso)
-            .FirstOrDefaultAsync(u => u.Correo == model.Correo);
+            .FirstOrDefaultAsync(u => u.UserName == model.UserName);
 
         if (usuario == null || !BCrypt.Net.BCrypt.Verify(model.Password, usuario.Password))
         {
-            ModelState.AddModelError("", "Correo o contraseña incorrectos.");
+            ModelState.AddModelError("", "Usuario o contraseña incorrectos.");
             return View(model);
         }
 
@@ -51,8 +51,10 @@ public class LoginController : Controller
             new(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
             new(ClaimTypes.Name,           usuario.Nombre),
             new(ClaimTypes.Email,          usuario.Correo),
+            new("UserName",                usuario.UserName),
             new(ClaimTypes.Role,           usuario.Rol?.Nombre ?? "Sin Rol")
         };
+
 
         // Permisos del rol → cada uno se agrega como claim "Permission"
         // Equivalente a auth()->user()->can() en Laravel

@@ -109,15 +109,20 @@ INSERT INTO `productos` (`id`, `nombre`, `descripcion`, `precio`, `stock`, `cate
 CREATE TABLE IF NOT EXISTS `usuarios` (
   `id` int NOT NULL AUTO_INCREMENT,
   `nombre` varchar(100) NOT NULL,
+  `username` varchar(50) NOT NULL,
   `correo` varchar(150) NOT NULL,
   `password` varchar(255) NOT NULL,
+  `rol_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `correo` (`correo`)
+  UNIQUE KEY `correo` (`correo`),
+  UNIQUE KEY `uk_usuarios_username` (`username`),
+  KEY `fk_usuario_rol` (`rol_id`),
+  CONSTRAINT `fk_usuario_rol` FOREIGN KEY (`rol_id`) REFERENCES `roles` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3;
 
 -- Volcando datos para la tabla inventario.usuarios: ~1 rows (aproximadamente)
-INSERT INTO `usuarios` (`id`, `nombre`, `correo`, `password`) VALUES
-	(2, 'Administrador', 'admin@demo.com', '$2a$11$OhHdSApn1LnQ.SpHeBYPweEyvw2niIjDle2JJnIasohhnkXbxAVJa');
+INSERT INTO `usuarios` (`id`, `nombre`, `username`, `correo`, `password`, `rol_id`) VALUES
+	(2, 'Administrador', 'admin', 'admin@demo.com', '$2a$11$OhHdSApn1LnQ.SpHeBYPweEyvw2niIjDle2JJnIasohhnkXbxAVJa', NULL);
 
 -- Volcando estructura para tabla inventario.ventas
 CREATE TABLE IF NOT EXISTS `ventas` (

@@ -44,7 +44,13 @@ public class ApplicationDbContext : DbContext
             .HasIndex(u => u.Correo)
             .IsUnique();
 
-        // ── Un producto → una categoría (restricción de borrado) ──
+        // ── Índice único en username (no pueden repetirse) ────
+        modelBuilder.Entity<Usuario>()
+            .HasIndex(u => u.UserName)
+            .IsUnique()
+            .HasDatabaseName("uk_usuarios_username");
+
+
         modelBuilder.Entity<Producto>()
             .HasOne(p => p.Categoria)
             .WithMany(c => c.Productos)

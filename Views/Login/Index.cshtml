@@ -101,17 +101,17 @@
             <form asp-action="Index" asp-controller="Login" method="post" class="space-y-5">
                 @Html.AntiForgeryToken()
                 <div>
-                    <label asp-for="Correo" class="block text-sm font-semibold text-gray-700 mb-2">
-                        Correo electronico
+                    <label asp-for="UserName" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Nombre de usuario
                     </label>
                     <div class="relative">
-                        <input asp-for="Correo" type="email" placeholder="admin@demo.com"
+                        <input asp-for="UserName" type="text" placeholder="admin" autocomplete="username"
                                 class="input-focus w-full px-4 py-3 pl-11 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 transition-all" />
                         <svg class="w-5 h-5 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                         </svg>
                     </div>
-                    <span asp-validation-for="Correo" class="text-red-500 text-xs mt-1.5 block"></span>
+                    <span asp-validation-for="UserName" class="text-red-500 text-xs mt-1.5 block"></span>
                 </div>
                 <!-- Contrasena -->
                 <div>
@@ -144,9 +144,9 @@
                 <div class="flex items-center justify-center gap-4 text-xs">
                     <div class="flex items-center gap-1.5">
                         <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                         </svg>
-                        <span class="font-mono text-gray-700">admin@demo.com</span>
+                        <span class="font-mono text-gray-700">admin</span>
                     </div>
                     <div class="flex items-center gap-1.5">
                         <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
