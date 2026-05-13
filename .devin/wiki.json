@@ -1,4 +1,7 @@
 {
-  "repo_notes": "Este es un proyecto universitario. Por favor, genera absolutamente toda la documentación, títulos, explicaciones y resúmenes estrictamente en idioma Español. No uses inglés.",
-  "pages": []
+  "repo_notes": [
+    {
+      "content": "Este es un proyecto universitario. Por favor, genera absolutamente toda la documentación, títulos, explicaciones y resúmenes estrictamente en idioma Español. No uses inglés."
+    }
+  ]
 }
