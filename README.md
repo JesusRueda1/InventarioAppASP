@@ -1,3 +1,55 @@
+## 📖 Documentación del Proyecto (Wiki)
+
+La documentación completa del sistema se encuentra en la carpeta [`docs/wiki/`](docs/wiki/).
+
+### Tabla de Contenido
+
+#### 1. Visión General
+- [Visión General del Proyecto](docs/wiki/01-Visión-General-del-Proyecto.md)
+- [Configuración del Entorno y Puesta en Marcha](docs/wiki/02-Configuración-del-Entorno-y-Puesta-en-Marcha.md)
+- [Arquitectura General de la Aplicación](docs/wiki/03-Arquitectura-General-de-la-Aplicación.md)
+
+#### 2. Capa de Datos
+- [Capa de Datos y Esquema de Base de Datos](docs/wiki/04-Capa-de-Datos-y-Esquema-de-Base-de-Datos.md)
+- [ApplicationDbContext y Configuración de EF Core](docs/wiki/05-ApplicationDbContext-y-Configuración-de-EF-Core.md)
+- [Modelos de Dominio: Catálogo e Inventario](docs/wiki/06-Modelos-de-Dominio-Catálogo-e-Inventario.md)
+- [Modelos de Dominio: Transacciones, Pagos y Kárdex](docs/wiki/07-Modelos-de-Dominio-Transacciones-Pagos-y-Kárdex.md)
+- [Modelos de Identidad: Usuario, Rol y Permiso](docs/wiki/08-Modelos-de-Identidad-Usuario-Rol-y-Permiso.md)
+
+#### 3. Autenticación y Autorización
+- [Autenticación y Autorización](docs/wiki/09-Autenticación-y-Autorización.md)
+- [Flujo de Autenticación con Cookies](docs/wiki/10-Flujo-de-Autenticación-con-Cookies.md)
+- [Control de Acceso Basado en Permisos (RBAC)](docs/wiki/11-Control-de-Acceso-Basado-en-Permisos-RBAC.md)
+- [Gestión de Usuarios y Roles](docs/wiki/12-Gestión-de-Usuarios-y-Roles.md)
+
+#### 4. Módulos de Negocio: Inventario y Catálogo
+- [Módulos de Negocio: Inventario y Catálogo](docs/wiki/13-Módulos-de-Negocio-Inventario-y-Catálogo.md)
+- [Gestión de Productos](docs/wiki/14-Gestión-de-Productos.md)
+- [Gestión de Categorías](docs/wiki/15-Gestión-de-Categorías.md)
+- [Ajuste de Kárdex (Stock Manual)](docs/wiki/16-Ajuste-de-Kárdex-Stock-Manual.md)
+
+#### 5. Módulos de Negocio: Compras y Ventas
+- [Módulos de Negocio: Compras y Ventas (POS)](docs/wiki/17-Módulos-de-Negocio-Compras-y-Ventas-POS.md)
+- [Módulo de Compras](docs/wiki/18-Módulo-de-Compras.md)
+- [Módulo de Ventas (Terminal POS)](docs/wiki/19-Módulo-de-Ventas-Terminal-POS.md)
+- [Gestión de Pagos y Cartera](docs/wiki/20-Gestión-de-Pagos-y-Cartera-Cuentas-por-CobrarPagar.md)
+
+#### 6. Reportes y Auditoría
+- [Reportes, Auditoría y Monitoreo](docs/wiki/21-Reportes-Auditoría-y-Monitoreo.md)
+- [Dashboard y Reportes de Negocio](docs/wiki/22-Dashboard-y-Reportes-de-Negocio.md)
+- [Sistema de Auditoría Global](docs/wiki/23-Sistema-de-Auditoría-Global.md)
+
+#### 7. Interfaz de Usuario
+- [Interfaz de Usuario y Componentes Frontend](docs/wiki/24-Interfaz-de-Usuario-y-Componentes-Frontend.md)
+- [Layout Compartido y Navegación](docs/wiki/25-Layout-Compartido-y-Navegación.md)
+- [Patrones de UI: Tablas, Modales y Notificaciones](docs/wiki/26-Patrones-de-UI-Tablas-Modales-y-Notificaciones.md)
+
+#### 8. Referencia
+- [Glosario de Términos y Conceptos Clave](docs/wiki/27-Glosario-de-Términos-y-Conceptos-Clave.md)
+
+
+---
+
 # 📦 Sistema de Inventario Simple
 **ASP.NET Core 8 MVC · Entity Framework Core · MySQL/MariaDB · Tailwind · jQuery · Tabulator**
 
@@ -182,52 +234,3 @@ dotnet clean
 | La tabla no carga | Abre las herramientas de desarrollador del navegador (F12) y revisa la consola |
 
 ---
-
-## 📖 Documentación del Proyecto (Wiki)
-
-La documentación completa del sistema se encuentra en la carpeta [`docs/wiki/`](docs/wiki/).
-
-### Tabla de Contenido
-
-#### 1. Visión General
-- [Visión General del Proyecto](docs/wiki/01-Visión-General-del-Proyecto.md)
-- [Configuración del Entorno y Puesta en Marcha](docs/wiki/02-Configuración-del-Entorno-y-Puesta-en-Marcha.md)
-- [Arquitectura General de la Aplicación](docs/wiki/03-Arquitectura-General-de-la-Aplicación.md)
-
-#### 2. Capa de Datos
-- [Capa de Datos y Esquema de Base de Datos](docs/wiki/04-Capa-de-Datos-y-Esquema-de-Base-de-Datos.md)
-- [ApplicationDbContext y Configuración de EF Core](docs/wiki/05-ApplicationDbContext-y-Configuración-de-EF-Core.md)
-- [Modelos de Dominio: Catálogo e Inventario](docs/wiki/06-Modelos-de-Dominio-Catálogo-e-Inventario.md)
-- [Modelos de Dominio: Transacciones, Pagos y Kárdex](docs/wiki/07-Modelos-de-Dominio-Transacciones-Pagos-y-Kárdex.md)
-- [Modelos de Identidad: Usuario, Rol y Permiso](docs/wiki/08-Modelos-de-Identidad-Usuario-Rol-y-Permiso.md)
-
-#### 3. Autenticación y Autorización
-- [Autenticación y Autorización](docs/wiki/09-Autenticación-y-Autorización.md)
-- [Flujo de Autenticación con Cookies](docs/wiki/10-Flujo-de-Autenticación-con-Cookies.md)
-- [Control de Acceso Basado en Permisos (RBAC)](docs/wiki/11-Control-de-Acceso-Basado-en-Permisos-RBAC.md)
-- [Gestión de Usuarios y Roles](docs/wiki/12-Gestión-de-Usuarios-y-Roles.md)
-
-#### 4. Módulos de Negocio: Inventario y Catálogo
-- [Módulos de Negocio: Inventario y Catálogo](docs/wiki/13-Módulos-de-Negocio-Inventario-y-Catálogo.md)
-- [Gestión de Productos](docs/wiki/14-Gestión-de-Productos.md)
-- [Gestión de Categorías](docs/wiki/15-Gestión-de-Categorías.md)
-- [Ajuste de Kárdex (Stock Manual)](docs/wiki/16-Ajuste-de-Kárdex-Stock-Manual.md)
-
-#### 5. Módulos de Negocio: Compras y Ventas
-- [Módulos de Negocio: Compras y Ventas (POS)](docs/wiki/17-Módulos-de-Negocio-Compras-y-Ventas-POS.md)
-- [Módulo de Compras](docs/wiki/18-Módulo-de-Compras.md)
-- [Módulo de Ventas (Terminal POS)](docs/wiki/19-Módulo-de-Ventas-Terminal-POS.md)
-- [Gestión de Pagos y Cartera](docs/wiki/20-Gestión-de-Pagos-y-Cartera-Cuentas-por-CobrarPagar.md)
-
-#### 6. Reportes y Auditoría
-- [Reportes, Auditoría y Monitoreo](docs/wiki/21-Reportes-Auditoría-y-Monitoreo.md)
-- [Dashboard y Reportes de Negocio](docs/wiki/22-Dashboard-y-Reportes-de-Negocio.md)
-- [Sistema de Auditoría Global](docs/wiki/23-Sistema-de-Auditoría-Global.md)
-
-#### 7. Interfaz de Usuario
-- [Interfaz de Usuario y Componentes Frontend](docs/wiki/24-Interfaz-de-Usuario-y-Componentes-Frontend.md)
-- [Layout Compartido y Navegación](docs/wiki/25-Layout-Compartido-y-Navegación.md)
-- [Patrones de UI: Tablas, Modales y Notificaciones](docs/wiki/26-Patrones-de-UI-Tablas-Modales-y-Notificaciones.md)
-
-#### 8. Referencia
-- [Glosario de Términos y Conceptos Clave](docs/wiki/27-Glosario-de-Términos-y-Conceptos-Clave.md)
