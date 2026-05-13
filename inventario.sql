@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS `auditoria_logs` (
   CONSTRAINT `fk_auditoria_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Volcando datos para la tabla inventario.auditoria_logs: ~9 rows (aproximadamente)
+-- Volcando datos para la tabla inventario.auditoria_logs: ~8 rows (aproximadamente)
 INSERT INTO `auditoria_logs` (`id`, `fecha`, `usuario_id`, `modulo`, `accion`, `detalles`, `direccion_ip`) VALUES
 	(1, '2026-04-16 17:23:46.126651', 2, 'Categorias', 'POST - Guardar', 'El usuario interactuó con el módulo Categorias ejecutando la acción Guardar.', '::1'),
 	(2, '2026-04-16 17:24:14.992123', 2, 'Categorias', 'POST - Guardar', 'El usuario interactuó con el módulo Categorias ejecutando la acción Guardar.', '::1'),
